@@ -1,0 +1,5 @@
+directory: /home/music/test
+directory: /home/music/test/songs
+directory: /home/music/test/vids
+import video: /home/music/test/vids/1479182838048.webm
+import video: /home/music/test/vids/Anamanaguchi - Meow.mov

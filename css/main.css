@@ -1,0 +1,107 @@
+:root {
+	--category-row-height: 45px;
+}
+
+body {
+	margin: 0px;
+	background-color: #aaa;
+}
+
+.hidden {
+	display: none;
+}
+
+#content {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
+#messages {
+	position: absolute;
+	right: 15px;
+	bottom: 10px;
+}
+.error_message {
+	background-color: #BA4741;
+	border: solid #AA3731;
+	border-radius: 10px;
+	padding: 15px;
+	margin-top: 5px;
+}
+
+.tile_sm {
+	width: 100px;
+	height: 100px;
+}
+.tile_sm .cover {
+	width: 100px;
+	height: 100px;
+}
+.tile_sm .add {
+	width: 30px;
+	height: 30px;
+	position: absolute;
+	transform: translateX(66px) translateY(3px);
+}
+.tile_sm .albumImageLink {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	transform: translateX(75px) translateY(75px);
+}
+.tile_sm .albumImageLink img {
+	width: 20px;
+	height: 20px;
+}
+
+.tile_med {
+	width: 200px;
+	height: 200px;
+}
+.tile_med .cover {
+	width: 200px;
+	height: 200px;
+}
+.tile_med .add {
+	width: 40px;
+	height: 40px;
+	position: absolute;
+	transform: translateX(156px) translateY(5px);
+}
+.tile_med .albumImageLink {
+	width: 25px;
+	height: 25px;
+	position: absolute;
+	transform: translateX(170px) translateY(170px);
+}
+.tile_med .albumImageLink img {
+	width: 25px;
+	height: 25px;
+}
+
+.tile_lg {
+	width: 400px;
+	height: 400px;
+}
+.tile_lg .cover {
+	width: 400px;
+	height: 400px;
+}
+.tile_lg .add {
+	width: 40px;
+	height: 40px;
+	position: absolute;
+	transform: translateX(356px) translateY(5px);
+}
+.tile_lg .albumImageLink {
+	width: 40px;
+	height: 40px;
+	position: absolute;
+	transform: translateX(385px) translateY(385px);
+}
+.tile_lg .albumImageLink img {
+	width: 40px;
+	height: 40px;
+}
+

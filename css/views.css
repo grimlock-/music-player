@@ -1,0 +1,24 @@
+#instance button.active {
+	cursor: pointer;
+	background-color: #2a5cbd;
+	border: none;
+}
+
+.tile_collection {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+#collection_items {
+	float: right;
+	height: 100%;
+	overflow: scroll;
+	background-color: aquamarine;
+}
+
+/**********
+  Timeline
+**********/
+#instance.timeline {
+	
+}

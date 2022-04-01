@@ -1,0 +1,108 @@
+/*Initial layout idea
+    -Categories bar up top stretching whole width, quicksearch at the right
+    -queue/playlist panel to left
+    -playback buttons and song art at bottom of queue panel
+    -category content taking up the rest
+*/
+.layout-one-grid {
+	display: grid;
+	grid-template-rows: var(--category-row-height) 3fr 1fr;
+	grid-template-columns: 300px 15px 3fr 1fr;
+}
+
+.layout-one-grid #categories {
+	grid-row: 1/2;
+	grid-column: 1/4;
+}
+
+.layout-one-grid #categories {
+	/*width: 100%;
+	height: var(--category-row-height);*/
+	display: flex;
+}
+
+.layout-one-grid .catButton {
+	border: none;
+	background-color: #4a7cdd;
+	text-align: center;
+	line-height: var(--category-row-height);
+	flex: auto;
+	cursor: pointer;
+	height: 100%;
+}
+.layout-one-grid .catButton.active {
+	background-color: #2a5cbd;
+	cursor: unset;
+}
+
+.layout-one-grid #quicksearch {
+	grid-row: 1/2;
+	grid-column: 4/5;
+}
+
+.layout-one-grid #queue {
+	grid-row: 2/3;
+	grid-column: 1/2;
+	/*display: table;*/
+}
+/*
+.layout-one-grid #queue > div {
+	display: table-row;
+}
+.layout-one-grid #queue > div > span {
+	display: table-cell;
+}
+*/
+.layout-one-grid #songs {
+	display: table;
+}
+
+.layout-one-grid #controls {
+	grid-row: 3/4;
+	grid-column: 1/2;
+}
+
+.layout-one-grid #divider {
+	grid-row: 2/4;
+	grid-column: 2/3;
+	background-color: #000;
+	cursor: col-resize;
+	margin-right: 4px;
+	margin-left: 4px;
+}
+
+.layout-one-grid #instance {
+	grid-row: 2/4;
+	grid-column: 3/5;
+	overflow: auto;
+}
+
+.layout-one-grid #quicksearch_results {
+	position: absolute;
+}
+
+/********
+  Queue
+********/
+#queue {
+	overflow: scroll;
+	background-color: #EEE;
+}
+#queue > div {
+	width: 100%;
+	line-height: 30px;
+	white-space: nowrap;
+}
+.progress {
+	overflow: visible;
+	background-color: #ABC;
+	/*overwritten via javascript as file loads*/
+	width: 0%;
+}
+.progress.complete {
+	background-color: lightgreen;
+}
+/********
+ ^Queue^
+********/
+

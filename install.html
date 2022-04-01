@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Music Installer</title>
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<style>
+	#type_fields {
+		display: flex;
+	}
+	#album_types input, #video_types input {
+		display: block;
+	}
+	#video_types {
+		margin-left: 10px;
+	}
+	</style>
+	<script>
+	function AddAlbumTypeField(e)
+	{
+		if(e.type == "keyup" && e.keyCode != 13 && e.keyCode != 32)
+			return;
+		let newField = document.createElement("input");
+		newField.type = "text";
+		newField.name = "album_types[]";
+		document.querySelector("#album_types").appendChild(newField);
+		newField.select();
+	}
+	function AddVideoTypeField(e)
+	{
+		if(e.type == "keyup" && e.keyCode != 13 && e.keyCode != 32)
+			return;
+		let newField = document.createElement("input");
+		newField.type = "text";
+		newField.name = "video_types[]";
+		document.querySelector("#video_types").appendChild(newField);
+		newField.select();
+	}
+	document.addEventListener("DOMContentLoaded", function(e){
+		let album_type_btn = document.querySelector(".add_album");
+		album_type_btn.addEventListener("click", AddAlbumTypeField);
+		album_type_btn.addEventListener("keyup", AddAlbumTypeField);
+		
+		let video_type_btn = document.querySelector(".add_video");
+		video_type_btn.addEventListener("click", AddVideoTypeField);
+		video_type_btn.addEventListener("keyup", AddVideoTypeField);
+		
+		document.querySelector("#fmtjpg").addEventListener("change", function(e){
+			let blah = document.querySelector("#thumbq");
+			blah.disabled = false;
+			blah.placeholder = "0 (worst) - 100 [def 80]";
+		});
+		document.querySelector("#fmtpng").addEventListener("change", function(e){
+			let blah = document.querySelector("#thumbq");
+			blah.disabled = false;
+			blah.placeholder = "0 (best,raw) to 9 [def 4]";
+		});
+		document.querySelector("#fmtwebp").addEventListener("change", function(e){
+			let blah = document.querySelector("#thumbq");
+			blah.disabled = false;
+			//The only hint I've been able to find about a default quality level is the
+			//spanish documentation for PHP's imagewebp saying the default was 80, but
+			//this was probably out of date since the english version of that page says
+			//-1 and the gd documentation doesn't give a hint of what it does in the
+			//absence of a quality value, it just says "a reasonable quality value"
+			//https://libgd.github.io/manuals/2.2.5/files/gd_webp-c.html
+			blah.placeholder = "0 (worst) - 100";
+		});
+		document.querySelector("#fmtgif").addEventListener("change", function(e){
+			let blah = document.querySelector("#thumbq");
+			blah.disabled = true;
+			blah.placeholder = "N/A";
+		});
+	});
+	</script>
+</head>
+<body>
+	<form method="post" action="install.php">
+		<label>Database URL <input type="text" name="dburl" placeholder="127.0.0.1" autofocus/></label><br/>
+		<label>Database Name <input type="text" name="dbname" placeholder="music" /></label><br/>
+		<label>Database User <input type="text" name="dbuser" placeholder="music" /></label><br/>
+		<label>Database Password <input type="password" name="dbpass" /></label><br/>
+		<label>Database Port <input type="text" name="dbport" placeholder="3306" /></label><br/><br/>
+		
+		<label>Artist info file <input type="text" name="artistnfo" placeholder="artist.nfo" /></label><br/>
+		<label>Album info file <input type="text" name="albumnfo" placeholder="album.nfo" /></label><br/>
+		<label>Album cover art filename <input type="text" name="aafname" placeholder="FullCover" /></label><br/>
+		<label>Album cover art directory <input type="text" name="aadir" placeholder="art/albums" /></label><br/>
+		<label>Song art directory <input type="text" name="sadir" placeholder="art/songs" /></label><br/><br/>
+		
+		<label>Album cover art thumbnail directory <input type="text" name="albumthumb" placeholder="thumbnails/albums" /></label><br/>
+		<label>Song art thumbnail directory <input type="text" name="songthumb" placeholder="thumbnails/songs" /></label><br/>
+		Thumbnail format
+		<label><input type="radio" id="fmtjpg" name="thumbfmt" value="jpg" checked />jpg</label>
+		<label><input type="radio" id="fmtpng" name="thumbfmt" value="png">png</label>
+		<label><input type="radio" id="fmtgif" name="thumbfmt" value="gif">gif</label>
+		<label><input type="radio" id="fmtwebp" name="thumbfmt" value="webp">webp</label>
+		</label><br/>
+		<label>Thumbnail quality level <input type="text" id="thumbq" name="thumbq" placeholder="0 (worst) - 100 [def 80]" /></label><br/><br/>
+		
+		<div id="type_fields">
+			<div id="album_types">
+				<h4>Album types</h4><button class="add_album" type="button">Add type</button>
+				<input type="text" name="album_types[]" value="studio album" />
+				<input type="text" name="album_types[]" value="live album" />
+				<input type="text" name="album_types[]" value="single" />
+				<input type="text" name="album_types[]" value="compilation" />
+				<input type="text" name="album_types[]" value="EP" />
+				<input type="text" name="album_types[]" value="movie soundtrack" />
+				<input type="text" name="album_types[]" value="game soundtrack" />
+				<input type="text" name="album_types[]" value="promo" />
+			</div>
+			
+			<div id="video_types">
+				<h4>Video types</h4><button class="add_video" type="button">Add type</button>
+				<input type="text" name="video_types[]" value="music video" />
+				<input type="text" name="video_types[]" value="lyric video" />
+				<input type="text" name="video_types[]" value="visualizer" />
+				<input type="text" name="video_types[]" value="live performance" />
+				<input type="text" name="video_types[]" value="clip" />
+			</div>
+		</div>
+		<hr/>
+		<label><input type="checkbox" name="reinstall" /> Check this to wipe the database and reinstall</label><br/>
+		
+		<input type="submit" value="Start Installation" />
+	</form>
+</body>
+</html>
