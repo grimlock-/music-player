@@ -1,0 +1,10 @@
+art/
+thumbnails/
+log/
+playlists/
+getid3/
+directories.txt
+
+# Dont't ignore these file
+!.gitignore
+!.gitattributes

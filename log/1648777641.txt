@@ -1,9 +1,0 @@
-directory: /home/music/test
-directory: /home/music/test/songs
-directory: /home/music/test/vids
-import video: /home/music/test/vids/1479182838048.webm
-import video: /home/music/test/vids/Anamanaguchi - Meow.mov
-import video: /home/music/test/vids/Animaniacs -  Yakko's Universe Song.mp4
-import video: /home/music/test/vids/C64 Jeroen Tels RoboCop 3 oscilloscope view.mp4
-import video: /home/music/test/vids/Cave Story ► Moonsong (Curlys Deep House Remix) ► GameChops [Full HD,1920x1080].mp4
-import video: /home/music/test/vids/Crossfade (Lucio Overwatch Remix).webm
