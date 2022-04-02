@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
-require("../config.php");
-require("../util.php");
+require("../www/config.php");
+require("../www/util.php");
 
 final class AlbumObject extends TestCase
 {
