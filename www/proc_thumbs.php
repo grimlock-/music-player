@@ -36,12 +36,19 @@ function initialscan($dirstr)
 	if($dirstr[strlen($dirstr)-1] == "/")
 		$dirstr = substr($dirstr, 0, strlen($dirstr)-1);
 
-	$ret = [];
+	$ret = ["artists" => [], "albums" => []];
+
+	if(file_exists($dirstr."/.nomedia"))
+		return $ret;
 
 	if(file_exists($dirstr."/$album_info_file"))
 	{
-		$ret[] = $dirstr;
+		$ret["albums"][] = $dirstr;
 		return $ret;
+	}
+	else if(file_exists($dirstr."/$artist_info_file"))
+	{
+		$ret["artists"][] = $dirstr;
 	}
 
 	$cdirs = [];
@@ -55,7 +62,8 @@ function initialscan($dirstr)
 	foreach($cdirs as $dir)
 	{
 		$results = initialscan($dir);
-		$ret = array_merge($ret, $results);
+		$ret["artists"] = array_merge($ret["artists"], $results["artists"]);
+		$ret["albums"] = array_merge($ret["albums"], $results["albums"]);
 	}
 	return $ret;
 }
@@ -212,6 +220,7 @@ $thumbnail_sizes = [1000, 700, 400];
 commandline_print("Thumbnail sizes: ".implode(',', $thumbnail_sizes)."\n");
 $dirs_file = "";
 $mediadirs = [];
+$artistdirs = [];
 $albumdirs = [];
 $options = getopt("f:p", ["directories-file:", "debug", "print"]);
 
@@ -250,8 +259,26 @@ foreach($mediadirs as $dir)
 {
 	if(empty($dir) || !file_exists($dir))
 		continue;
-	$albumdirs = array_merge($albumdirs, initialscan($dir));
+	$scan = initialscan($dir);
+	$albumdirs = array_merge($albumdirs, $scan["albums"]);
+	$artistdirs = array_merge($albumdirs, $scan["artist"]);
 }
+
+//Handle artists
+/*commandline_print("Handling artists\n");
+$i = 0;
+$len = count($songs);
+foreach($artistdirs as $adir)
+{
+	commandline_print("\r".++$i."/$len");
+	$sql = "SELECT id FROM artists WHERE directory = '".$db->real_escape_string($adir)."';";
+	$result = $db->query($sql);
+	if($result === false)
+		continue;
+
+	$id = $result->fetch_row()[0];
+	if(file_exists("$adir/$artist_tile_file"))
+}*/
 
 //Handle songs with embedded art
 commandline_print("Handling songs with embedded art\n");

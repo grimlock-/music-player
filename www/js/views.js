@@ -401,7 +401,7 @@ let Timeline = {
 					if(artist == "No Artist")
 						i.src = "img/noartist.png";
 					else
-						i.src = "img/400.png";
+						i.src = "img/artist_fallback.png";
 					innerNode.appendChild(i);
 					newNode.appendChild(innerNode);
 

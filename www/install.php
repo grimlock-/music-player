@@ -7,6 +7,7 @@
 	 *   dbpass: string
 	 *   dbport: int
 	 *   artistnfo: string
+	 *   artisttile: string
 	 *   albumnfo: string
 	 *   aafname: string
 	 *   aadir: string
@@ -64,6 +65,7 @@
 	$dbpass = "";
 	$dbport = 3306;
 	$artist_info_file = "artist.nfo";
+	$artist_tile_file = "tile.png";
 	$album_info_file = "album.nfo";
 	$album_art_filename = "FullCover";
 	$album_art_directory = "art/albums/";
@@ -83,6 +85,7 @@
 	if(!empty($_POST["dbpass"])) $dbpass = $_POST["dbpass"];
 	if(!empty($_POST["dbport"])) $dbport = $_POST["dbport"];
 	if(!empty($_POST["artistnfo"])) $artist_info_file = $_POST["artistnfo"];
+	if(!empty($_POST["artisttile"])) $artist_tile_file = $_POST["artisttile"];
 	if(!empty($_POST["albumnfo"])) $album_info_file = $_POST["albumnfo"];
 	if(!empty($_POST["aafname"])) $album_art_filename = $_POST["aafname"];
 	if(!empty($_POST["aadir"])) $album_art_directory = $_POST["aadir"];
@@ -177,6 +180,7 @@
 	'$dbpass = "'.$dbpass.'";'."\n".
 	'$dbport = "'.$dbport.'";'."\n".
 	'$artist_info_file = "'.$artist_info_file.'";'."\n".
+	'$artist_tile_file = "'.$artist_tile_file.'";'."\n".
 	'$album_info_file = "'.$album_info_file.'";'."\n".
 	'$album_art_filename = "'.$album_art_filename.'";'."\n".
 	'$album_art_directory = "'.$album_art_directory.'";'."\n".
