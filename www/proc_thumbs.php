@@ -10,9 +10,8 @@ if(strpos(getcwd(), "/api") !== false)
 require("config.php");
 require("util.php");
 require("getid3/getid3.php");
-$info_output = false;
-$debug = true;
-$debug = ($info_output && $debug);
+$print_allowed = false;
+$debug = false;
 
 switch($thumbnail_format)
 {
@@ -199,8 +198,8 @@ function generate_thumbnails($srcimage, $destination, $name_root)
 }
 function commandline_print($message)
 {
-	GLOBAL $info_output;
-	if($info_output)
+	GLOBAL $print_allowed;
+	if($print_allowed)
 		echo $message;
 }
 
@@ -214,7 +213,7 @@ commandline_print("Thumbnail sizes: ".implode(',', $thumbnail_sizes)."\n");
 $dirs_file = "";
 $mediadirs = [];
 $albumdirs = [];
-$options = getopt("f:", ["directories-file:"]);
+$options = getopt("f:p", ["directories-file:", "debug", "print"]);
 
 //Setup libs
 $id3 = new getID3;
@@ -227,6 +226,13 @@ if(isset($options["f"]))
 	$dirs_file = $options["f"];
 if(isset($options["directories-file"]))
 	$dirs_file = $options["directories-file"];
+if(isset($options["debug"]))
+{
+	$print_allowed = true;
+	$debug = true;
+}
+else if(isset($options["print"]) || isset($options["p"]))
+	$print_allowed = true;
 
 //Assemble list of album directories
 if(!empty($dirs_file))

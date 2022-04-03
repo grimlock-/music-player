@@ -205,7 +205,14 @@ foreach($multiartist_files as $file)
 		$configstr .= $line;
 	}
 	if(!empty($configstr))
-		$artists[] = make_artist_obj($configstr);
+	{
+		$a = make_artist_obj($configstr);
+		if($a !== false)
+		{
+			$a["directory"] = null;
+			array_push($artists, $a);
+		}
+	}
 
 	foreach($artists as $a)
 	{
@@ -216,16 +223,7 @@ foreach($multiartist_files as $file)
 			continue;
 		}
 		$n = $result->fetch_row()[0];
-		if(!$n)
-		{
-			$a["id"] = newid(10);
-			data_queueup_artistadd($a);
-			data_assign_artistaliases($a["id"], $a["aliases"]);
-			data_assign_artistcountries($a["id"], $a["countries"]);
-			if(isset($a["favorite"]))
-				data_queueup_favoriteartist($a["id"], "");
-		}
-		else if($n == 1)
+		if($n == 1)
 		{
 			$result = $db->query("SELECT id,hash FROM artists WHERE id = GetArtistId_Exact('".$db->real_escape_string($a["primaryname"])."');");
 			if($result === false)
@@ -237,12 +235,21 @@ foreach($multiartist_files as $file)
 			if($a["hash"] != $vals["hash"])
 			{
 				$a["id"] = $vals["id"];
-				//$a["hash"] = $vals["hash"];
 				data_queueup_artistedit($a);
 				data_assign_artistaliases($a["id"], $a["aliases"]);
 				data_assign_artistcountries($a["id"], $a["countries"]);
 			}
 			if($a["favorite"])
+				data_queueup_favoriteartist($a["id"], "");
+		}
+		else
+		{
+			echo "GetArtistId_Count(".$a["primaryname"]."): $n\n";
+			$a["id"] = newid(10);
+			data_queueup_artistadd($a);
+			data_assign_artistaliases($a["id"], $a["aliases"]);
+			data_assign_artistcountries($a["id"], $a["countries"]);
+			if(isset($a["favorite"]))
 				data_queueup_favoriteartist($a["id"], "");
 		}
 	}
@@ -273,7 +280,7 @@ run_prepared_statement("$dbname.artists", $ps_artists["new"],
 		}
 		else
 		{
-			$name = explode("|", $data[1])[0];
+			$name = $data[3];
 			$id = $data[0];
 			import_error("Error ".$db->errno." adding artist $name ($id): ".$db->error."\n");
 			if(array_key_exists($id, $artistcountries))
@@ -331,7 +338,7 @@ run_prepared_statement("$dbname.albums", $ps_albums["new"],
 		}
 		else
 		{
-			$name = explode(";", $data[1])[0];
+			$name = $data[3];
 			$id = $data[0];
 			import_error("Error ".$db->errno." adding album $name ($id): ".$db->error."\n");
 			if(array_key_exists($id, $albumtags))
@@ -374,7 +381,7 @@ run_prepared_statement("$dbname.albums", $ps_albums["moved"],
 commandline_print("Adding new songs\n");
 set_status("Importing songs");
 run_prepared_statement("$dbname.songs", $ps_songs["new"],
-	"INSERT INTO *TABLE* (id,filepath,hash,album_id,title,genre,guest_artists,track_number,disc_number,release_date,comment,duration,import_date,true_import_date,art,embedded_art) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+	"INSERT INTO *TABLE* (id,filepath,last_update,hash,album_id,title,genre,guest_artists,track_number,disc_number,release_date,comment,duration,import_date,true_import_date,art,embedded_art) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 	function($data) {
 		import_log("Added song ".$data[1]."\n");
 	},
@@ -429,7 +436,7 @@ run_prepared_statement("$dbname.songs", $ps_songs["new"],
 	});
 commandline_print("Updating songs\n");
 run_prepared_statement("$dbname.songs", $ps_songs["update"],
-	"UPDATE *TABLE* SET hash=?,album_id=?,title=?,genre=?,guest_artists=?,track_number=?,disc_number=?,release_date=?,comment=?,duration=?,import_date=?,art=?,embedded_art=? WHERE id=?",
+	"UPDATE *TABLE* SET last_update=?,hash=?,album_id=?,title=?,genre=?,guest_artists=?,track_number=?,disc_number=?,release_date=?,comment=?,duration=?,import_date=?,art=?,embedded_art=? WHERE id=?",
 	function($data) {
 		import_log("Updated song ".explode("|", $data[0])[0]."\n");
 	},
@@ -470,7 +477,7 @@ run_prepared_statement("$dbname.songs", $ps_songs["remove"],
 commandline_print("Adding new videos\n");
 set_status("Importing videos");
 run_prepared_statement("$dbname.videos", $ps_videos["new"],
-	"INSERT INTO *TABLE* (id,filepath,hash,titles,genre,guest_artists,duration,release_date,import_date,true_import_date,type,comment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+	"INSERT INTO *TABLE* (id,filepath,last_update,hash,titles,genre,guest_artists,duration,release_date,import_date,true_import_date,type,comment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
 	function($data) {
 		import_log("Added video ".$data[1]."\n");
 	},
@@ -499,7 +506,7 @@ run_prepared_statement("$dbname.videos", $ps_videos["new"],
 	});
 commandline_print("Updating videos\n");
 run_prepared_statement("$dbname.videos", $ps_videos["update"],
-	"UPDATE *TABLE* SET hash=?,titles=?,genre=?,artists=?,guest_artists=?,duration=?,release_date=?,import_date=?,type=?,comment=? WHERE id=?",
+	"UPDATE *TABLE* SET last_update=?,hash=?,titles=?,genre=?,artists=?,guest_artists=?,duration=?,release_date=?,import_date=?,type=?,comment=? WHERE id=?",
 	function($data) {
 		import_log("Updated video ".$data[0]."\n");
 	},

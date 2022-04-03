@@ -379,6 +379,10 @@ function make_artist_obj($configstr)
 		$artist["primaryname"] = substr($artist["names"], 0, $i);
 		$artist["aliases"] = substr($artist["names"], $i+1);
 	}
+	else
+	{
+		$artist["primaryname"] = $artist["names"];
+	}
 
 	return $artist;
 }
@@ -537,6 +541,7 @@ function make_song_obj($filepath, &$albumObj = null)
 	$track_info = [
 		"id" => "",
 		"filepath" => $filepath,
+		"last_update" => filemtime($filepath),
 		"hash" => hash_file("sha1", $filepath),
 		"album" => (!is_null($albumObj)) ? $albumObj["id"] : "",
 		"titles" => "",
@@ -816,6 +821,7 @@ function make_video_obj($filepath)
 	$video_info = [
 		"id" => "",
 		"filepath" => $filepath,
+		"last_update" => filemtime($filepath),
 		"hash" => hash_file("sha1", $filepath),
 		"titles" => "",
 		"comment" => "",
@@ -832,8 +838,6 @@ function make_video_obj($filepath)
 		"favorite" => false
 	];
 	$id3->CopyTagsToComments($libinfo);
-
-	//import_log(print_r($libinfo["comments"], true));
 
 	//Title
 	if(isset($libinfo["comments"]["title"]))
@@ -1162,8 +1166,6 @@ function parse_multiartist_file($filepath)
 				else
 					$tmpartist["external_links"] .= "|$value";
 			break;
-
-			//TODO - add external ID cases
 		}
 	}
 	if(isset($tmpartist["primaryname"]))

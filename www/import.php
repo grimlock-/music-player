@@ -162,13 +162,13 @@ function import_artist($artistdir)
 	//Get all tracks in DB under artist dir
 	$dbtracks = [];
 	$where = "filepath LIKE '".$db->real_escape_string($artistdir)."%'";
-	$result = $db->query("SELECT id,filepath,hash FROM songs WHERE $where UNION SELECT id,filepath,hash FROM videos WHERE $where;");
+	$result = $db->query("SELECT id,filepath,hash,last_update FROM songs WHERE $where UNION SELECT id,filepath,hash,last_update FROM videos WHERE $where;");
 	if($result)
 	{
 		//Use filepaths as keys in the array
 		while($row = $result->fetch_assoc())
 		{
-			$dbtracks[$row["filepath"]] = [ "id" => $row["id"], "hash" => $row["hash"] ];
+			$dbtracks[$row["filepath"]] = [ "id" => $row["id"], "hash" => $row["hash"], "last_update" => $row["last_update"] ];
 		}
 	}
 	else
@@ -330,7 +330,7 @@ function import_album($albumdir, &$dbtracks = null, &$artistObj = null)
 	{
 		$dbtracks = [];
 		$where = "filepath LIKE '".$db->real_escape_string($albumdir."/")."%'";
-		$q = "SELECT id,filepath,hash FROM songs WHERE $where UNION SELECT id,filepath,hash FROM videos WHERE $where;";
+		$q = "SELECT id,filepath,hash,last_update FROM songs WHERE $where UNION SELECT id,filepath,hash,last_update FROM videos WHERE $where;";
 		$result = $db->query($q);
 		if($result === false)
 		{
@@ -341,7 +341,7 @@ function import_album($albumdir, &$dbtracks = null, &$artistObj = null)
 		//Use filepaths as keys in the array
 		while($row = $result->fetch_assoc())
 		{
-			$dbtracks[$row["filepath"]] = [ "id" => $row["id"], "hash" => $row["hash"] ];
+			$dbtracks[$row["filepath"]] = [ "id" => $row["id"], "hash" => $row["hash"], "last_update" => $row["last_update"] ];
 		}
 	}
 	else
@@ -473,7 +473,7 @@ function import_directory($dirstr, &$dbtracks = null, $cleanDbTracks = true, &$a
 		$dbtracks = [];
 		$escaped_paren = str_ireplace(")", "\\\\)", str_ireplace("(", "\\\\(", $dirstr));
 		$where = "filepath REGEXP '^".$db->real_escape_string($escaped_paren."/")."[^/]+$'";
-		$q = "SELECT id,filepath,hash FROM songs WHERE $where UNION SELECT id,filepath,hash FROM videos WHERE $where;";
+		$q = "SELECT id,filepath,hash,last_update FROM songs WHERE $where UNION SELECT id,filepath,hash,last_update FROM videos WHERE $where;";
 		$result = $db->query($q);
 		if($result === false)
 		{
@@ -494,7 +494,7 @@ function import_directory($dirstr, &$dbtracks = null, $cleanDbTracks = true, &$a
 		}
 		while($row = $result->fetch_assoc())
 		{
-			$dbtracks[$row["filepath"]] = [ "id" => $row["id"], "hash" => $row["hash"] ];
+			$dbtracks[$row["filepath"]] = [ "id" => $row["id"], "hash" => $row["hash"], "last_update" => $row["last_update"] ];
 		}
 	}
 
@@ -549,8 +549,8 @@ function import_audio($fpath, &$dbtracks = null, &$albumObj = null, &$artistObj 
 
 	if(array_key_exists($fpath, $dbtracks))
 	{
-		$h = hash_file("sha1", $fpath);
-		if($h != $dbtracks[$fpath]["hash"])
+		$t = filemtime($fpath);
+		if($t > $dbtracks[$fpath]["last_update"])
 		{
 			$trackObj = make_song_obj($fpath, $albumObj);
 			if($trackObj === false)
@@ -558,6 +558,7 @@ function import_audio($fpath, &$dbtracks = null, &$albumObj = null, &$artistObj 
 			log_changes("Song update $fpath\n");
 
 			$trackObj["id"] = $dbtracks[$fpath]["id"];
+			$trackObj["hash"] = hash_file("sha1", $fpath);
 
 			//Queue up DB changes
 			data_queueup_songedit($trackObj);
@@ -592,7 +593,10 @@ function import_audio($fpath, &$dbtracks = null, &$albumObj = null, &$artistObj 
 		if($trackObj === false)
 			return;
 		log_changes("New song ".$fpath."\n");
+
 		$trackObj["id"] = newid(10);
+		$trackObj["hash"] = hash_file("sha1", $fpath);
+
 		data_queueup_songadd($trackObj);
 		$i = strpos($trackObj["titles"], "|");
 		if($i !== false)
@@ -629,19 +633,22 @@ function import_video($fpath, &$dbtracks, &$artistObj = null)
 	$videoObj = false;
 	if(array_key_exists($fpath, $dbtracks))
 	{
-		$h = hash_file("sha1", $fpath);
-		if($h != $dbtracks[$fpath]["hash"])
+		$t = filemtime($fpath);
+		if($t > $dbtracks[$fpath]["last_update"])
 		{
 			$videoObj = make_video_obj($fpath);
 			if($videoObj !== false)
 			{
 				log_changes("Video update $fpath\n");
+
 				$videoObj["id"] = $dbtracks[$fpath]["id"];
 
 				data_queueup_videoedit($videoObj);
 				if(is_null($artistObj))
 					data_assign_videoartists_name($videoObj["id"], $artistObj["id"]);
 				data_assign_videotags($videoObj["id"], $videoObj["tags"]);
+				if($videoObj["favorite"])
+					data_queueup_favoritevideo($videoObj["id"], $videoObj["filepath"]);
 			}
 		}
 		unset($dbtracks[$fpath]);
@@ -661,10 +668,10 @@ function import_video($fpath, &$dbtracks, &$artistObj = null)
 				data_assign_videoartists_name($videoObj["id"], $videoObj["artists"]);
 			if(!empty($videoObj["tags"]))
 				data_assign_videotags($videoObj["id"], $videoObj["tags"]);
+			if($videoObj["favorite"])
+				data_queueup_favoritevideo($videoObj["id"], $videoObj["filepath"]);
 		}
 	}
-	if($videoObj["favorite"])
-		data_queueup_favoritevideo($videoObj["id"], $videoObj["filepath"]);
 }
 function moved_directory($olddir, $newdir)
 {
@@ -796,7 +803,9 @@ function directory_was_moved($dir)
 	return "";
 }
 
-//TODO - ensure the data functions match up with the queries in proc_import (check last_update namely)
+
+
+
 function data_queueup_songadd($data)
 {
 	GLOBAL $ps_songs;
@@ -808,6 +817,7 @@ function data_queueup_songadd($data)
 	$ps_songs["new"][] = [
 		$data["id"],
 		$data["filepath"],
+		$data["last_update"],
 		$data["hash"],
 		$data["album"] ? $data["album"] : null,
 		$title,
@@ -833,6 +843,7 @@ function data_queueup_songedit($data)
 	else
 		$title = $data["titles"];
 	$ps_songs["update"][] = [
+		$data["last_update"],
 		$data["hash"],
 		$data["album"] ? $data["album"] : null,
 		$title,
@@ -925,10 +936,10 @@ function data_queueup_videoadd($data)
 	$ps_videos["new"][] = [
 		$data["id"],
 		$data["filepath"],
+		$data["last_update"],
 		$data["hash"],
 		$data["titles"],
 		$data["genre"],
-		$data["artists"],
 		$data["guest_artists"],
 		$data["duration"],
 		$data["release_date"] ? $data["release_date"] : null,
@@ -947,6 +958,7 @@ function data_queueup_videoedit($data)
 	else
 		$title = $data["titles"];
 	$ps_videos["update"][] = [
+		$data["last_update"],
 		$data["hash"],
 		$data["titles"],
 		$data["genre"],
