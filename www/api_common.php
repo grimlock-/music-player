@@ -12,7 +12,6 @@ $video_fields = "videos.id,
 		videos.titles,
 		videos.songs,
 		videos.genre,
-		videos.artists,
 		videos.duration,
 		videos.type";
 function GetSongInfo_id(array $ids)

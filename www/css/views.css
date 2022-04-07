@@ -9,16 +9,31 @@
 	flex-wrap: wrap;
 }
 
-#collection_items {
-	float: right;
-	height: 100%;
-	overflow: scroll;
-	background-color: aquamarine;
-}
-
 /**********
   Timeline
 **********/
 #instance.timeline {
 	
+}
+.timeline #collection_spotlight {
+	float: right;
+	height: 100%;
+	background-color: aquamarine;
+	position: sticky;
+	top: 0px;
+	width: 32%;
+	z-index: 1;
+}
+.timeline #collection_spotlight .close {
+	float: right;
+	margin-top: 5px;
+	margin-right: 5px;
+}
+.timeline #collection_spotlight img {
+	width: 200px;
+	height: 200px;
+}
+.timeline #collection_items {
+	overflow: auto;
+	background-color: aquamarine;
 }

@@ -242,6 +242,7 @@ let Timeline = {
 		Instance.querySelector("#large").addEventListener("click", this.SetSize.bind(this, "large"));
 		Instance.querySelector("#medium").addEventListener("click", this.SetSize.bind(this, "medium"));
 		Instance.querySelector("#small").addEventListener("click", this.SetSize.bind(this, "small"));
+		Instance.querySelector(".close").addEventListener("click", this._hideCollection);
 		if(!this.mode)
 			this.SetMode(Config.Get("views.timeline.default_grouping") || "day");
 		this.Apply(this.songs);
@@ -626,9 +627,10 @@ let Timeline = {
 	},
 	_showCollection: function() {
 		let root = GetCollectionRoot(this);
-		let disp = document.getElementById("collection_items");
-		disp.innerHTML = document.getElementById("timeline_template").content.querySelector("#collection_items").innerHTML;
-		disp.querySelector("img").src = root.querySelector("img").src;
+		let spot = document.getElementById("collection_spotlight");
+		let container = spot.querySelector("#collection_items");
+		container.innerHTML = "";
+		spot.querySelector("img").src = root.querySelector(".cover").src;
 		for(let song of root.querySelectorAll("*[data-songid]"))
 		{
 			let id = song.dataset.songid;
@@ -642,12 +644,12 @@ let Timeline = {
 				text += data.track_number + " - ";
 			text += data.title + " - " + Util.StoMS(data.duration);
 			ele.innerHTML = text;
-			disp.appendChild(ele);
+			container.appendChild(ele);
 		}
-		disp.classList.remove("hidden");
+		spot.classList.remove("hidden");
 	},
 	_hideCollection: function() {
-		document.getElementById("collection_items").classList.add("hidden");
+		document.getElementById("collection_spotlight").classList.add("hidden");
 	}
 }
 
@@ -1014,11 +1016,31 @@ let Random = {
 };
 
 let Playlists = {
+	initialized: false,
 	Init: async function() {
+	},
+	Draw: function() {
+	},
+	Appy: function(data) {
 	}
 };
 
 let Videos = {
+	initialized: false,
 	Init: async function() {
+	},
+	Draw: function() {
+	},
+	Appy: function(data) {
+	}
+}
+
+let Artist = {
+	initialized: false,
+	Init: async function() {
+	},
+	Draw: function() {
+	},
+	Appy: function(data) {
 	}
 }

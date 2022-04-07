@@ -4,6 +4,7 @@ log/
 playlists/
 getid3/
 directories.txt
+*.swp
 
 # Dont't ignore these file
 !.gitignore

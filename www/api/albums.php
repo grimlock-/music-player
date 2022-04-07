@@ -62,7 +62,7 @@
 	else
 		$match .= $db->real_escape_string($_GET["char"]).".*";
 	//query
-	$q = "SELECT id,name,type,artists,release_date FROM albums WHERE LOWER(name) REGEXP '$match';";
+	$q = "SELECT id,name,type,release_date FROM albums WHERE LOWER(name) REGEXP '$match';";
 	$result = $db->query($q);
 	if($result === false)
 		kill("Error getting albums: ".$db->error);
