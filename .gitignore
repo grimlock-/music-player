@@ -5,6 +5,7 @@ playlists/
 getid3/
 directories.txt
 *.swp
+*.vim
 
 # Dont't ignore these file
 !.gitignore
