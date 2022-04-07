@@ -44,106 +44,134 @@ export function StoHMS(seconds)
 }
 
 
-// -1  -  a < b, a comes first
+/********
+ sorting
+********/
+// <0  -  a < b, a comes first
 //  0  -  a = b
-//  1  -  a > b, b comes first
-export function SongsByTrackNumber_Asc(first, second)
+// >0  -  a > b, b comes first
+export function SortSongsByTrackNumber_Asc(first, second)
 {
-	if(first.disc_number > second.disc_number)
-		return 1;
-	if(second.disc_number > first.disc_number)
-		return -1;
+	if(first.disc_number != second.disc_number)
+		return first.disc_number - second.disc_number;
 
-	if(first.track_number)
-	{
-		if(second.track_number)
-			return first.track_number - second.track_number;
-		else
-			return 1;
-	}
-	else
-	{
-		if(second.track_number)
-			return -1;
-		else
-			return 0;
-	}
+	let a = first.track_number || 0;
+	let b = second.track_number || 0;
+	return a - b;
 }
-
-export function SongsByTrackNumber_Desc(first, second)
+export function SortSongsByTrackNumber_Desc(first, second)
 {
-	if(first.disc_number > second.disc_number)
-		return -1;
-	if(second.disc_number > first.disc_number)
-		return 1;
+	if(first.disc_number != second.disc_number)
+		return second.disc_number - first.disc_number;
 
-	if(first.track_number)
-	{
-		if(second.track_number)
-			return second.track_number - first.track_number;
-		else
-			return -1;
-	}
-	else
-	{
-		if(second.track_number)
-			return 1;
-		else
-			return 0;
-	}
+	let a = first.track_number || 0;
+	let b = second.track_number || 0;
+	return b - a;
 }
-
-export function SongsByAlbumName_Asc(first, second)
+export function SortSongsByAlbumName_Asc(first, second)
 {
 	if(first.album_id)
 	{
-		if(!second.album_id)
-			return 1;
+		if(second.album_id)
+			return first.album.localeCompare(second.album);
 		else
-			return second.album.localeCompare(first.album);
+			return -1;
 	}
 	else
 	{
-		if(!second.album_id)
-			return second.album;
+		if(second.album_id)
+			return 1;
 		else
-			return -1;
+			return 0;
 	}
 }
-
-export function AlbumsByName_Asc(first, second)
+export function SortSongsByImportDate_Desc(first, second)
 {
-	return first.name.localeCompare(second.name);
+	return DateSort(first.import_date, second.import_date, "desc");
 }
-
-export function Dates_Desc(first, second)
+export function SortAlbumsByName_Asc(first, second)
 {
-	let y1 = Number(first.substring(0,4));
-	let y2 = Number(second.substring(0,4));
+	return StringSort(first.name, second.name);
+	//return first.name.localeCompare(second.name);
+}
+export function SortDates_Desc(first, second)
+{
+	return DateSort(first, second, "desc");
+}
+function DateSort(first, second, mode = "asc")
+{
+	let a = first, b = second;
+	if(mode == "desc")
+	{
+		let t = a;
+		a = b;
+		b = t;
+	}
+
+	let y1 = Number(a.substring(0,4));
+	let y2 = Number(b.substring(0,4));
 	if(y1 != y2)
-	{
-		if(y1 > y2)
-			return -1;
-		else
-			return 1;
-	}
-	if(y1.length > 4 || y2.length > 4)
+		return y1 - y2;
+	if(y1.length <= 4 || y2.length <= 4)
 		return 0;
-	let m1 = Number(first.substring(5,7));
-	let m2 = Number(second.substring(5,7));
+	let m1 = Number(a.substring(5,7));
+	let m2 = Number(b.substring(5,7));
 	if(m1 != m2)
-	{
-		if(m1 > m2)
-			return -1;
-		else
-			return 1;
-	}
-	if(y1.length > 7 || y2.length > 7)
+		return m1 - m2;
+	if(y1.length <= 7 || y2.length <= 7)
 		return 0;
-	let d1 = Number(first.substring(8));
-	let d2 = Number(second.substring(8));
-	return d2-d1;
+	let d1 = Number(a.substring(8));
+	let d2 = Number(b.substring(8));
+	return d1-d2;
 }
+function StringSort(first, second, mode = "asc")
+{
+	if(mode == "asc")
+		return first.localeCompare(second);
+	else
+		return second.localeCompare(first);
+}
+/*********
+ grouping
+*********/
+export function GroupSongsByDate(songs)
+{
+	let container = {};
+	for(let item of songs)
+	{
+		if(!container[item.import_date])
+			container[item.import_date] = [];
+		container[item.import_date].push(item);
+	}
+	return container;
+}
+export function GroupSongsByMonth(songs)
+{
+	let container = {};
+	let key;
+	for(let item of songs)
+	{
+		key = item.import_date.substring(0, 7);
+		if(!container[key])
+			container[key] = [];
+		container[key].push(item);
+	}
+	return container;
+}
+export function GroupSongsByYear(songs)
+{
+	let container = {};
+	let year;
+	for(let item of songs)
+	{
+		year = item.import_date.substring(0, 4);
+		if(!container[year])
+			container[year] = [];
+		container[year].push(item);
+	}
+	return container;
+}
+
 
 export function IsSpecialChar(c)
 {
@@ -153,83 +181,4 @@ export function IsPunct(c)
 {
 	return c.match(/^[:punct:]/);
 }
-
-/***********************************/
-// https://stackoverflow.com/questions/7255719/downloading-binary-data-using-xmlhttprequest-without-overridemimetype#answer-60760997
-export function hexdump(uint8array)
-{
-    let count = 0;
-    let line = "";
-    let lineCount = 0;
-    let content = "";
-    for(let i=0; i<uint8array.byteLength; i++) {
-        let c = uint8array[i];
-        let hex =  c.toString(16).padStart (2, "0");
-        line += hex + " ";
-        count++;
-        if (count === 16) {
-            let lineCountHex = (lineCount).toString (16).padStart (7, "0") + "0";
-            content += lineCountHex + " " + line + "\n";
-            line = "";
-            count = 0;
-            lineCount++;
-        }
-    }
-    if(line) {
-        let lineCountHex = (lineCount).toString (16).padStart (7, "0") + "0";
-        content += lineCountHex + " " + line + "\n";
-        line = "";
-        //            count = 0;
-        lineCount++;
-    }
-    content+= (lineCount).toString (16).padStart (7, "0") + count.toString(16) +"\n";
-    return content;
-}
-
-export function textToFile(fname, text)
-{
-	let tag = document.createElement("a");
-	tag.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(text));
-	tag.setAttribute("download", fname);
-	tag.style.display = "none";
-	document.body.appendChild(tag);
-	tag.click();
-	document.body.removeChild(tag);
-}
-/*console.log("`: " + (IsSpecialChar("`") != null));
-console.log("~: " + (IsSpecialChar("~") != null));
-console.log("!: " + (IsSpecialChar("!") != null));
-console.log("@: " + (IsSpecialChar("@") != null));
-console.log("#: " + (IsSpecialChar("#") != null));
-console.log("$: " + (IsSpecialChar("$") != null));
-console.log("%: " + (IsSpecialChar("%") != null));
-console.log("^: " + (IsSpecialChar("^") != null));
-console.log("&: " + (IsSpecialChar("&") != null));
-console.log("*: " + (IsSpecialChar("*") != null));
-console.log("(: " + (IsSpecialChar("(") != null));
-console.log("): " + (IsSpecialChar(")") != null));
-console.log("_: " + (IsSpecialChar("_") != null));
-console.log("+: " + (IsSpecialChar("+") != null));
-console.log("-: " + (IsSpecialChar("-") != null));
-console.log("=: " + (IsSpecialChar("=") != null));
-console.log(",: " + (IsSpecialChar(",") != null));
-console.log(".: " + (IsSpecialChar(".") != null));
-console.log("/: " + (IsSpecialChar("/") != null));
-console.log(";: " + (IsSpecialChar(";") != null));
-console.log(":: " + (IsSpecialChar(":") != null));
-console.log("\\: " + (IsSpecialChar("\\") != null));
-console.log("|: " + (IsSpecialChar("|") != null));
-console.log("<: " + (IsSpecialChar("<") != null));
-console.log(">: " + (IsSpecialChar(">") != null));
-console.log("?: " + (IsSpecialChar("?") != null));
-console.log("[: " + (IsSpecialChar("[") != null));
-console.log("]: " + (IsSpecialChar("]") != null));
-console.log("{: " + (IsSpecialChar("{") != null));
-console.log("}: " + (IsSpecialChar("}") != null));
-console.log("a: " + (IsSpecialChar("a") != null));
-console.log("q: " + (IsSpecialChar("q") != null));
-console.log("3: " + (IsSpecialChar("3") != null));
-console.log("ü: " + (IsSpecialChar("ü") != null));
-console.log("letter S: " + (IsSpecialChar("S") != null));*/
-/***********************************/
 

@@ -254,22 +254,22 @@ let Timeline = {
 			Instance.addEventListener("scroll", this._scrollDelegate);
 	},
 	Apply: function(data) {
-		let groups = {};
+		let groups;
 		let container = document.getElementById("items");
 		switch(this.mode)
 		{
 			case "day":
-				this.GroupByDate(data, groups);
+				groups = Util.GroupSongsByDate(data);
 			break;
 			case "year":
-				this.GroupByYear(data, groups);
+				groups = Util.GroupSongsByYear(data);
 			break;
 			case "month":
-				this.GroupByMonth(data, groups);
+				groups = Util.GroupSongsByMonth(data);
 			break;
 		}
 		//Iterate through groupings
-		let keys = Object.keys(groups).sort(Util.Dates_Desc);
+		let keys = Object.keys(groups).sort(Util.SortDates_Desc);
 		for(let date of keys)
 		{
 			let wrapper = document.createElement("div");
@@ -320,9 +320,9 @@ let Timeline = {
 			}
 
 			//Sort by track number
-			groups[date].sort(Util.SongsByTrackNumber_Asc);
+			groups[date].sort(Util.SortSongsByTrackNumber_Asc);
 			//Sort by album name
-			groups[date].sort(Util.SongsByAlbumName_Asc);
+			groups[date].sort(Util.SortSongsByAlbumName_Asc);
 
 			let alb = {"id": "", "name": "", "songs": []};
 			let artists = {};
@@ -597,34 +597,6 @@ let Timeline = {
 		if(this.initialized)
 			this.ScrollListener();
 	},
-	GroupByDate: function(songs, container) {
-		let key = "";
-		for(let item of songs)
-		{
-			if(!container[item.import_date])
-				container[item.import_date] = [];
-			container[item.import_date].push(item);
-		}
-	},
-	GroupByYear: function(songs, container) {
-		for(let item of songs)
-		{
-			let year = item.import_date.substring(0, 4);
-			if(!container[year])
-				container[year] = [];
-			container[year].push(item);
-		}
-	},
-	GroupByMonth: function(songs, container) {
-		let key = "";
-		for(let item of songs)
-		{
-			key = item.import_date.substring(0, 7);
-			if(!container[key])
-				container[key] = [];
-			container[key].push(item);
-		}
-	},
 	_showCollection: function() {
 		let root = GetCollectionRoot(this);
 		let spot = document.getElementById("collection_spotlight");
@@ -679,7 +651,7 @@ let Artists = {
 		this.generateLetterBuckets(this.buckets, letterHolder);
 	},
 	Apply: function(data) {
-		data.sort(Util.AlbumsByName_Asc);
+		data.sort(Util.SortAlbumsByName_Asc);
 		let container = document.getElementById("artists");
 		for(let artist of data)
 		{
@@ -747,7 +719,7 @@ let Albums = {
 		this.generateLetterBuckets(this.buckets, letterHolder);
 	},
 	Apply: function(data) {
-		data.sort(Util.AlbumsByName_Asc);
+		data.sort(Util.SortAlbumsByName_Asc);
 		let container = document.getElementById("albums");
 		for(let album of data)
 		{

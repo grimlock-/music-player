@@ -322,6 +322,7 @@ function import_album($albumdir, &$dbtracks = null, &$artistObj = null)
 		$row = $result->fetch_assoc();
 		$album["id"] = $row["id"];
 		$oldhash = $row["hash"];
+		//TODO - When the album import date is updated, this forces an update on all the songs
 	}
 	import_log("Found album: $albumdir\n");
 
