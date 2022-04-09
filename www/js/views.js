@@ -31,10 +31,11 @@ import * as Util from './util.js';
 
 let Instance = document.getElementById("instance");
 let Months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+let Views = [];
 
 export function Get(name)
 {
-	switch(name)
+	switch(name.toLowerCase())
 	{
 		case "artists":
 			return Artists;
@@ -54,6 +55,8 @@ export function Get(name)
 			return Playlists;
 		case "videos":
 			return Videos;
+		case "artist"
+			return Artist;
 
 		default:
 			return Timeline;
@@ -411,6 +414,11 @@ let Timeline = {
 
 					let songs = document.createElement("div");
 					songs.classList.add("hidden");
+					//title
+					let title = document.createElement("div");
+					title.dataset.title = artist;
+					songs.appendChild(title);
+					//songs
 					for(let song of artists[artist])
 					{
 						let newEle = document.createElement("span");
@@ -472,8 +480,13 @@ let Timeline = {
 		let aaBtn = albumDiv.querySelector("input");
 		aaBtn.onclick = _appendCollection;
 
-		let songs = document.createElement("div")
+		let songs = document.createElement("div");
 		songs.classList.add("hidden");
+		//add album stuff
+		let title = document.createElement("div");
+		title.dataset.title = albumObj.name;
+		songs.appendChild(title);
+		//add songs
 		for(let t of albumObj.songs)
 		{
 			let newEle = document.createElement("span");
@@ -600,9 +613,29 @@ let Timeline = {
 	_showCollection: function() {
 		let root = GetCollectionRoot(this);
 		let spot = document.getElementById("collection_spotlight");
-		let container = spot.querySelector("#collection_items");
+		let container = document.getElementById("collection_items");
 		container.innerHTML = "";
 		spot.querySelector("img").src = root.querySelector(".cover").src;
+		if(root.querySelector("*[data-title]"))
+		{
+			let t = root.querySelector("*[data-title]").dataset.title;
+			let i = t.indexOf("|");
+			if(i != -1)
+			{
+				let title = t.substring(0, i);
+				spot.querySelector(".collection_title").innerHTML = title;
+				let aa = spot.querySelector(".album_aliases");
+				aa.classList.remove("hidden");
+				aa.innerHTML = t.substring(i+1);
+			}
+			else
+			{
+				spot.querySelector(".collection_title").innerHTML = t;
+				let aa = spot.querySelector(".album_aliases");
+				if(!aa.classList.contains("hidden"))
+					aa.classList.add("hidden");
+			}
+		}
 		for(let song of root.querySelectorAll("*[data-songid]"))
 		{
 			let id = song.dataset.songid;

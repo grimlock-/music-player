@@ -13,14 +13,15 @@
   Timeline
 **********/
 #instance.timeline {
-	
+	position: relative;
 }
 .timeline #collection_spotlight {
 	float: right;
 	height: 100%;
-	background-color: aquamarine;
+	background-color: cyan;
 	position: sticky;
 	top: 0px;
+	right: 0px;
 	width: 32%;
 	z-index: 1;
 }
@@ -35,5 +36,4 @@
 }
 .timeline #collection_items {
 	overflow: auto;
-	background-color: aquamarine;
 }
