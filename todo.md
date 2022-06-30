@@ -1,5 +1,23 @@
 ## Feature wishlist
-Support for timed lyrics
+Views
+* (finish) artist list
+* artist view
+* real-world timeline
+* genre tree
+* favorites
+* songs with params for
+  * derivatives like covers, parodies, remixes
+  * tags
+
+MediaSession API use to interact with OS-level playback controls
+
+Support for multiple album and song covers
+
+Video support with configurable video types for filtering/grouping
+
+Web Notifications API (to enable in plain HTTP in Firefox, see config option ``dom.webnotifications.allowinsecure``)
+
+Support for setting and displaying timed lyrics
 
 While a song is playing, allow setting the art as the overall page's background
 
