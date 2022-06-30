@@ -164,25 +164,26 @@ $videotags = [];
 
 //Process files
 set_status("Processing general directories");
-commandline_print("Importing generic directories\n");
+commandline_print("Scaning directories\n");
 foreach($regulardirs as $dir)
 {
 	import_directory($dir);
 }
 set_status("Processing album directories");
-commandline_print("Importing albums directories\n");
+commandline_print("Scaning albums\n");
 foreach($albumdirs as $dir)
 {
 	import_album($dir);
 }
 set_status("Processing artist directories");
-commandline_print("Importing artist directories\n");
+commandline_print("Scaning artists\n");
 foreach($artistdirs as $dir)
 {
 	import_artist($dir);
 }
 foreach($multiartist_files as $file)
 {
+	import_log("Scanning artist text file: $file\n");
 	//$set = parse_multiartist_file($file);
 	$configstr = "";
 	$artists = [];
@@ -192,7 +193,7 @@ foreach($multiartist_files as $file)
 		{
 			if(!empty($configstr))
 			{
-				$a = make_artist_obj($configstr);
+				$a = make_artist_obj(mb_trim($configstr));
 				if($a !== false)
 				{
 					$a["directory"] = null;
@@ -206,7 +207,7 @@ foreach($multiartist_files as $file)
 	}
 	if(!empty($configstr))
 	{
-		$a = make_artist_obj($configstr);
+		$a = make_artist_obj(mb_trim($configstr));
 		if($a !== false)
 		{
 			$a["directory"] = null;
@@ -235,6 +236,7 @@ foreach($multiartist_files as $file)
 			if($a["hash"] != $vals["hash"])
 			{
 				$a["id"] = $vals["id"];
+				log_changes("Updating artist ".$a["primaryname"]."\n");
 				data_queueup_artistedit($a);
 				data_assign_artistaliases($a["id"], $a["aliases"]);
 				data_assign_artistcountries($a["id"], $a["countries"]);
@@ -242,9 +244,10 @@ foreach($multiartist_files as $file)
 			if($a["favorite"])
 				data_queueup_favoriteartist($a["id"], "");
 		}
-		else
+		else if($n == 0)
 		{
-			echo "GetArtistId_Count(".$a["primaryname"]."): $n\n";
+			import_log("New artist: ".$a["primaryname"]."\n");
+			log_changes("New artist: ".$a["primaryname"]."\n");
 			$a["id"] = newid(10);
 			data_queueup_artistadd($a);
 			data_assign_artistaliases($a["id"], $a["aliases"]);
@@ -258,7 +261,7 @@ foreach($multiartist_files as $file)
 
 //Run SQL stuff
 commandline_print("Adding new artists\n");
-set_status("Importing artists");
+set_status("Adding artists");
 run_prepared_statement("$dbname.artists", $ps_artists["new"],
 	"INSERT INTO *TABLE*(id,directory,hash,name,description,locations,external_links) VALUES(?,?,?,?,?,?,?);",
 	function($data) {
@@ -315,9 +318,9 @@ run_prepared_statement("$dbname.artists", $ps_artists["moved"],
 
 
 commandline_print("Adding new albums\n");
-set_status("Importing albums");
+set_status("Adding albums");
 run_prepared_statement("$dbname.albums", $ps_albums["new"],
-	"INSERT INTO *TABLE* (id,directory,hash,name,type,release_date,remaster_date,comment) VALUES(?,?,?,?,?,?,?,?);",
+	"INSERT INTO *TABLE* (id,directory,hash,title,type,release_date,remaster_date,comment) VALUES(?,?,?,?,?,?,?,?);",
 	function($data) {
 		import_log("Added album ".explode(";", $data[1])[0]."\n");
 	},
@@ -353,7 +356,7 @@ run_prepared_statement("$dbname.albums", $ps_albums["new"],
 	});
 commandline_print("Updating albums\n");
 run_prepared_statement("$dbname.albums", $ps_albums["update"],
-	"UPDATE *TABLE* SET directory=?,hash=?,name=?,type=?,release_date=?,remaster_date=?,comment=? WHERE id=?",
+	"UPDATE *TABLE* SET directory=?,hash=?,title=?,type=?,release_date=?,remaster_date=?,comment=? WHERE id=?",
 	function($data) {
 		import_log("Updated album ".explode(";", $data[0])[0]."\n");
 	},
@@ -379,7 +382,7 @@ run_prepared_statement("$dbname.albums", $ps_albums["moved"],
 
 
 commandline_print("Adding new songs\n");
-set_status("Importing songs");
+set_status("Adding songs");
 run_prepared_statement("$dbname.songs", $ps_songs["new"],
 	"INSERT INTO *TABLE* (id,filepath,last_update,hash,album_id,title,genre,guest_artists,track_number,disc_number,release_date,comment,duration,import_date,true_import_date,art,embedded_art) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 	function($data) {
@@ -475,7 +478,7 @@ run_prepared_statement("$dbname.songs", $ps_songs["remove"],
 
 
 commandline_print("Adding new videos\n");
-set_status("Importing videos");
+set_status("Adding videos");
 run_prepared_statement("$dbname.videos", $ps_videos["new"],
 	"INSERT INTO *TABLE* (id,filepath,last_update,hash,titles,genre,guest_artists,duration,release_date,import_date,true_import_date,type,comment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
 	function($data) {

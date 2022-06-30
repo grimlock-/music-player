@@ -40,8 +40,8 @@ function SetView(view, section = "default")
 		return;
 
 	ChangingViews = true;
-	let viewObj = Views.Get(CurrentView);
-	if(viewObj.Out)
+	let viewObj = Views.Get(CurrentView || Config.Get("default_view"));
+	if(viewObj.initialized)
 		viewObj.Out();
 	viewObj = Views.Get(view);
 	if(!viewObj.initialized)
@@ -176,11 +176,15 @@ function _quicksearch(e)
 		);
 
 		if(document.activeElement === ele)
-			Cache.SetSearchResults(val, response);
+			Cache.SetSearchResults(val, data);
 		if(ele.value == val)
-			SetQuickSearchResults(response);
+		{
+			QuickSearchResults.classList.remove("hidden");
+			SetQuickSearchResults(data);
+		}
 	});
-	xhr.open("GET", API + "quicksearch.php?query=" + encodeURIComponent(val));
+	let limit = Config.Get("quicksearch.max_item_count_per_category");
+	xhr.open("GET", API + "quicksearch.php?query=" + encodeURIComponent(val) + "&limit=" + limit);
 	xhr.send();
 }
 function _qsblur(e)
@@ -189,10 +193,10 @@ function _qsblur(e)
 }
 function _qsfocus(e)
 {
-	if(Config.Get("quicksearch.show_results_on_focus"))
+	if(Config.Get("quicksearch.show_results_on_focus") && this.value.length)
 	{
 		QuickSearchResults.classList.remove("hidden");
-		let results = Cache.GetSearchResults();
+		let results = Cache.GetSearchResults(this.value);
 		if(results)
 			SetQuickSearchResults(results);
 	}
@@ -209,26 +213,41 @@ function SetQuickSearchResults(results)
 	else
 	{
 		let wrapper;
+		//TODO - handle aliases when the back-end can
 		for(let item of results.songs)
 		{
 			if(!Cache.GetSongInfo(item.id))
 				Cache.SetSongInfo(item.id, item);
 			wrapper = document.createElement("div");
 			if(item.art == "song")
-				wrapper.innerHTML = "<img src='thumbnails/songs/"+item.id+"'>";
-			console.log(item.id + ": " + item.type);
+				wrapper.innerHTML = "<img src='thumbnails/songs/"+item.id+".jpg'>";
+			wrapper.innerHTML += Util.EscHtml(item.title);
+			console.log("Song: " + item.title + " (" + item.id + ")");
+			QuickSearchResults.appendChild(wrapper);
 		}
 		for(let item of results.videos)
 		{
+			if(!Cache.GetVideoInfo(item.id))
+				Cache.SetVideoInfo(item.id, item);
 			wrapper = document.createElement("div");
+			wrapper.innerHTML += Util.EscHtml(item.title);
+			console.log("Video: " + item.title + " (" + item.id + ")");
+			QuickSearchResults.appendChild(wrapper);
 		}
 		for(let item of results.albums)
 		{
 			wrapper = document.createElement("div");
+			wrapper.innerHTML = "<img src='thumbnails/albums/"+item.id+".jpg'>";
+			wrapper.innerHTML += Util.EscHtml(item.title);
+			console.log("Album: " + item.title + " (" + item.id + ")");
+			QuickSearchResults.appendChild(wrapper);
 		}
 		for(let item of results.artists)
 		{
 			wrapper = document.createElement("div");
+			wrapper.innerHTML += Util.EscHtml(item.title);
+			console.log("Artist: " + item.title + " (" + item.id + ")");
+			QuickSearchResults.appendChild(wrapper);
 		}
 	}
 }

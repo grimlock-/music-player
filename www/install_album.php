@@ -7,7 +7,7 @@ function Albums()
 		"id CHAR(10) PRIMARY KEY,".
 		"directory TEXT UNIQUE,".
 		"hash TEXT UNIQUE,".
-		"name TEXT,".
+		"title TEXT,".
 		"type ENUM(ZZZZ),".
 		"release_date DATE,".
 		"remaster_date DATE,".

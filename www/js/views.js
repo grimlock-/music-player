@@ -55,7 +55,7 @@ export function Get(name)
 			return Playlists;
 		case "videos":
 			return Videos;
-		case "artist"
+		case "artist":
 			return Artist;
 
 		default:

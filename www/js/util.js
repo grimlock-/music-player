@@ -173,6 +173,8 @@ export function GroupSongsByYear(songs)
 }
 
 
+
+
 export function IsSpecialChar(c)
 {
 	return c.match(new RegExp('^[`~!@#\\$%\\^&\\*\\(\\)\\./,\\<\\>\\?\\[\\]\\"\\\';\\:\\-_=+\\]\\\\|\\{\\}]'));
@@ -181,4 +183,35 @@ export function IsPunct(c)
 {
 	return c.match(/^[:punct:]/);
 }
-
+export function EscHtml(str)
+{
+	let ret = "";
+	for(var c of str)
+	{
+		switch(c)
+		{
+			case '<':
+				ret += "&lt;";
+			break;
+			case '>':
+				ret += "&gt;";
+			break;
+			case '\'':
+				ret += "&#039;";
+			break;
+			case '"':
+				ret += "&quot;";
+			break;
+			/*case '`':
+				ret += "&;";
+			break;*/
+			case '&':
+				ret += "&amp;";
+			break;
+			default:
+				ret += c;
+			break;
+		}
+	}
+	return ret;
+}

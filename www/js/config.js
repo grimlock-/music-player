@@ -61,7 +61,14 @@ const defaultSettings =
 		//When clicking on the search field and giving it focus, immediately show search results instead of waiting for the input to change
 		show_results_on_focus: true,
 		result_order: "relevancy", //"relevancy", "alphabetical", "type"
-		type_order: "track,video,album,artist"
+		type_order: "track,video,album,artist",
+		//Allow disabling the matching of searches with aliases
+		include_aliases: true,
+		max_item_count_per_category: 3
+	},
+	lastfm: {
+		scrobbling_enabled: false,
+		api_key: ""
 	}
 };
 const Constraints =
@@ -87,6 +94,13 @@ const Constraints =
 				type: "number",
 				minimum: 1
 			}
+		}
+	},
+	quicksearch: {
+		max_item_count_per_category: {
+			type: "number",
+			minimum: 1,
+			maximum: 20
 		}
 	}
 };

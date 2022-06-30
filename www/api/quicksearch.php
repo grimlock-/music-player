@@ -21,6 +21,11 @@
 
 	if(!isset($_GET["query"]))
 		kill("No query");
+	$limit = 3;
+	if(isset($_GET["limit"]) && is_numeric($_GET["limit"]) && $_GET["limit"] > 0)
+		$limit = $_GET["limit"];
+	if($limit > 20)
+		$limit = 20;
 
 	require("../config.php");
 	require("../util.php");
@@ -30,20 +35,10 @@
 	if($db->connect_errno)
 		kill("Database connection failed (".$db->connect_errno."): ".$db->connect_error);
 
-	//$q = "";
+	$search_text = $db->real_escape_string($_GET["query"]);
 
-	if(strlen($query) >= 6)
-	{
-		$response = ["songs" => [], "videos" => [], "albums" => [], "artists" => []];
-	}
-	else
-	{
-		if(strlen($query) >= 4
-			$qt = 3;
-		else
-			$qt = 1;
-		$response = ["songs" => GetSongInfo_rand($qt), "videos" => GetVideoInfo_rand($qt), "albums" => [], "artists" => []];
-	}
+	//$response = ["songs" => SearchSongs_Title($search_text, $limit), "videos" => SearchVideos_Title($search_text, $limit), "albums" => SearchAlbums_Title($search_text, $limit), "artists" => SearchArtists_Name($search_text, $limit)];
+	$response = ["songs" => GetSongInfo_rand(2), "videos" => GetVideoInfo_rand(2), "albums" => GetAlbumInfo_rand(2, true), "artists" => GetArtistInfo_rand(2)];
 
 	header("Content-Type: application/json");
 	echo json_encode($response);

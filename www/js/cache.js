@@ -83,11 +83,8 @@ let qsTest = [
 ];
 export function GetSearchResults(key)
 {
-	return qsTest.concat();
-
-
-	/*if(SearchResults !== undefined)
+	if(SearchResults !== undefined)
 		return SearchResults[key];
 	else
-		return null;*/
+		return null;
 }

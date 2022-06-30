@@ -31,9 +31,9 @@ body {
 }
 
 .close {
-	background-image: url("../img/close.png");
-	width: 32px;
-	height: 32px;
+	background-image: url("../img/close.svg");
+	width: 25px;
+	height: 25px;
 	cursor: pointer;
 	border: none;
 }

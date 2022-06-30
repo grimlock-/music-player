@@ -120,7 +120,7 @@ function import_artist($artistdir)
 
 			if($result->num_rows == 0)
 			{
-				import_log("Import artist: $artistdir\n");
+				import_log("New artist: $artistdir\n");
 				log_changes("New artist $artistdir\n");
 				$artist["id"] = newid(10);
 

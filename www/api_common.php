@@ -14,6 +14,14 @@ $video_fields = "videos.id,
 		videos.genre,
 		videos.duration,
 		videos.type";
+$album_fields = "albums.id,
+		albums.title,
+		albums.type,
+		albums.release_date,
+		albums.remaster_date";
+$artist_fields = "artists.id,
+		artists.name,
+		artists.locations";
 function GetSongInfo_id(array $ids)
 {
 	GLOBAL $db;
@@ -25,7 +33,7 @@ function GetSongInfo_id(array $ids)
 		)
 		SELECT
 			$song_fields,
-			b.name AS album,
+			b.title AS album,
 			GROUP_CONCAT(d.name SEPARATOR '|') AS artists
 		FROM song_ids
 		NATURAL JOIN
@@ -46,7 +54,7 @@ function GetSongInfo_id(array $ids)
 			id;";
 	$result = $db->query($q);
 	if($result === false)
-		kill("Error executing SQL query: ".$db->error);
+		kill("Error executing query: ".$db->error);
 
 	$items = $result->fetch_all(MYSQLI_ASSOC);
 	return $items;
@@ -66,7 +74,7 @@ function GetSongInfo_date($rangeStart, $rangeEnd)
 		)
 		SELECT
 			songs.*,
-			b.name AS album,
+			b.title AS album,
 			GROUP_CONCAT(d.name SEPARATOR '|') AS artists
 		FROM song_range AS songs
 		LEFT JOIN
@@ -103,7 +111,7 @@ function GetSongInfo_rand($count)
 		)
 		SELECT
 			songs.*,
-			b.name AS album,
+			b.title AS album,
 			GROUP_CONCAT(d.name SEPARATOR '|') AS artists
 		FROM song_range AS songs
 		LEFT JOIN
@@ -145,13 +153,16 @@ function GetVideoInfo_rand($count)
 function GetAlbumInfo_rand($count, $resolve)
 {
 	GLOBAL $db;
-	$q = "SELECT * FROM albums ORDER BY RAND() LIMIT $count;";
+	GLOBAL $album_fields;
+	$q = "SELECT $album_fields FROM albums ORDER BY RAND() LIMIT $count;";
 	$result = $db->query($q);
 	if($result === false)
 		return [];
 	$items = $result->fetch_all(MYSQLI_ASSOC);
 	return $items;
 }
+
+
 
 function GetAlbumSongs($id, $song_fields = "*")
 {
@@ -172,6 +183,12 @@ function GetAlbumSongs($id, $song_fields = "*")
 	return $ret;
 }
 
+function GetArtistInfo_rand($count)
+{
+	GLOBAL $db;
+	return [];
+}
+
 function GetIntroInfo($ids)
 {
 	GLOBAL $db;
@@ -182,18 +199,115 @@ function GetIntroInfo($ids)
 	}
 }
 
-function SearchSongs_Title($title)
+function SearchSongs_Title($title, $limit)
 {
 	GLOBAL $db;
 	GLOBAL $song_fields;
 	$q = "WITH matches (
-		SELECT $song_fields,GROUP_CONCAT(b.alias, '|') AS aliases FROM songs a JOIN song_aliases b WHERE title LIKE %".$db->real_escape_string($title)."% OR aliases LIKE %".$db->real_escape_string($title)."% GROUP BY a.id
+		SELECT
+			$song_fields,
+			GROUP_CONCAT(b.alias, '|') AS aliases
+		FROM
+			songs a
+		NATURAL JOIN
+			song_aliases b
+		GROUP BY
+			a.id
 	)
-	SELECT ";
+	SELECT *
+	FROM matches
+	WHERE title LIKE '%".$db->real_escape_string($title)."%'
+	OR aliases LIKE '%".$db->real_escape_string($title)."%'";
+	if(isset($limit))
+		$q .= "LIMIT $limit";
+	$q .= ";";
 	$result = $db->query($q);
 	if($result === false)
-		kill();
+		kill("Error executing query: ".$db->error);
 	if($result->num_rows == 0)
 		return [];
+	else
+		return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+function SearchVideos_Title($title, $limit)
+{
+	GLOBAL $db;
+	GLOBAL $video_fields;
+	$q = "SELECT
+			$video_fields
+		FROM
+			videos
+		WHERE
+			titles LIKE '%".$db->real_escape_string($title)."%'";
+		if(isset($limit))
+			$q .= "LIMIT $limit";
+		$q .= ";";
+	$result = $db->query($q);
+	if($result === false)
+		kill("Error executing query: ".$db->error);
+	if($result->num_rows == 0)
+		return [];
+	else
+		return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+function SearchAlbums_Title($title, $limit)
+{
+	GLOBAL $db;
+	GLOBAL $album_fields;
+	$q = "WITH matches(
+			$album_fields,
+			GROUP_CONCAT(b.alias, '|') AS aliases
+		FROM
+			albums a
+		NATURAL JOIN
+			album_aliases b
+		GROUP BY
+			a.id
+		)
+	SELECT $album_fields
+	WHERE title LIKE '%".$db->real_escape_string($title)."%'";
+	if(isset($limit))
+		$q .= "LIMIT $limit";
+	$q .= ";";
+	$result = $db->query($q);
+	if($result === false)
+		kill("Error executing query: ".$db->error);
+	if($result->num_rows == 0)
+		return [];
+	else
+		return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+function SearchArtists_Name($title, $limit)
+{
+	GLOBAL $db;
+	GLOBAL $artist_fields;
+	$q = "WITH matches(
+			$artist_fields,
+			GROUP_CONCAT(b.alias, '|') AS aliases,
+			GROUP_CONCAT(c.country, '|') AS countries
+		FROM
+			artists a
+		NATURAL JOIN
+			artist_aliases b
+		NATURAL JOIN
+			artist_countries c
+		GROUP BY
+			a.id
+		)
+	SELECT $album_fields
+	WHERE title LIKE '%".$db->real_escape_string($title)."%'";
+	if(isset($limit))
+		$q .= "LIMIT $limit";
+	$q .= ";";
+	$result = $db->query($q);
+	if($result === false)
+		kill("Error executing query: ".$db->error);
+	if($result->num_rows == 0)
+		return [];
+	else
+		return $result->fetch_all(MYSQLI_ASSOC);
 }
 ?>
