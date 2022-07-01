@@ -162,7 +162,7 @@ for(let button of document.querySelectorAll("*[data-view]"))
 function _quicksearch(e)
 {
 	let ele = this;
-	if(this.value.length < 2)
+	if(this.value.length == 0)
 	{
 		QuickSearchResults.innerHTML = "";
 		return;
@@ -209,45 +209,54 @@ function SetQuickSearchResults(results)
 		results.artists.length == 0)
 	{
 		QuickSearchResults.innerHTML = "No results";
+		return;
 	}
-	else
+
+	QuickSearchResults.innerHTML = "";
+	let order = Config.Get("quicksearch.type_order").split(",");
+	let wrapper;
+	for(let set of order)
 	{
-		let wrapper;
-		//TODO - handle aliases when the back-end can
-		for(let item of results.songs)
+		//TODO - display aliases
+		if(set == "songs")
 		{
-			if(!Cache.GetSongInfo(item.id))
-				Cache.SetSongInfo(item.id, item);
-			wrapper = document.createElement("div");
-			if(item.art == "song")
-				wrapper.innerHTML = "<img src='thumbnails/songs/"+item.id+".jpg'>";
-			wrapper.innerHTML += Util.EscHtml(item.title);
-			console.log("Song: " + item.title + " (" + item.id + ")");
-			QuickSearchResults.appendChild(wrapper);
+			for(let item of results.songs)
+			{
+				wrapper = document.createElement("div");
+				if(!Cache.GetSongInfo(item.id))
+					Cache.SetSongInfo(item.id, item);
+				wrapper.innerHTML += Util.EscHtml(item.title);
+				QuickSearchResults.appendChild(wrapper);
+			}
 		}
-		for(let item of results.videos)
+		else if(set == "albums")
 		{
-			if(!Cache.GetVideoInfo(item.id))
-				Cache.SetVideoInfo(item.id, item);
-			wrapper = document.createElement("div");
-			wrapper.innerHTML += Util.EscHtml(item.title);
-			console.log("Video: " + item.title + " (" + item.id + ")");
-			QuickSearchResults.appendChild(wrapper);
+			for(let item of results.albums)
+			{
+				wrapper = document.createElement("div");
+				wrapper.innerHTML += Util.EscHtml(item.title);
+				QuickSearchResults.appendChild(wrapper);
+			}
 		}
-		for(let item of results.albums)
+		else if(set == "videos")
 		{
-			wrapper = document.createElement("div");
-			wrapper.innerHTML = "<img src='thumbnails/albums/"+item.id+".jpg'>";
-			wrapper.innerHTML += Util.EscHtml(item.title);
-			console.log("Album: " + item.title + " (" + item.id + ")");
-			QuickSearchResults.appendChild(wrapper);
+			for(let item of results.videos)
+			{
+				wrapper = document.createElement("div");
+				if(!Cache.GetVideoInfo(item.id))
+					Cache.SetVideoInfo(item.id, item);
+				wrapper.innerHTML += Util.EscHtml(item.titles);
+				QuickSearchResults.appendChild(wrapper);
+			}
 		}
-		for(let item of results.artists)
+		else if(set == "artists")
 		{
-			wrapper = document.createElement("div");
-			wrapper.innerHTML += Util.EscHtml(item.title);
-			console.log("Artist: " + item.title + " (" + item.id + ")");
-			QuickSearchResults.appendChild(wrapper);
+			for(let item of results.artists)
+			{
+				wrapper = document.createElement("div");
+				wrapper.innerHTML += Util.EscHtml(item.name);
+				QuickSearchResults.appendChild(wrapper);
+			}
 		}
 	}
 }

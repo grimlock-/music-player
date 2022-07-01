@@ -60,10 +60,7 @@ const defaultSettings =
 		clear_input_on_enqueue: false,
 		//When clicking on the search field and giving it focus, immediately show search results instead of waiting for the input to change
 		show_results_on_focus: true,
-		result_order: "relevancy", //"relevancy", "alphabetical", "type"
-		type_order: "track,video,album,artist",
-		//Allow disabling the matching of searches with aliases
-		include_aliases: true,
+		type_order: "songs,videos,albums,artists",
 		max_item_count_per_category: 3
 	},
 	lastfm: {

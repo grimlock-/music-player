@@ -10,7 +10,6 @@ $song_fields = "songs.id,
 		songs.import_date";
 $video_fields = "videos.id,
 		videos.titles,
-		videos.songs,
 		videos.genre,
 		videos.duration,
 		videos.type";
@@ -203,16 +202,16 @@ function SearchSongs_Title($title, $limit)
 {
 	GLOBAL $db;
 	GLOBAL $song_fields;
-	$q = "WITH matches (
+	$q = "WITH matches AS (
 		SELECT
 			$song_fields,
 			GROUP_CONCAT(b.alias, '|') AS aliases
 		FROM
-			songs a
-		NATURAL JOIN
+			songs
+		NATURAL LEFT JOIN
 			song_aliases b
 		GROUP BY
-			a.id
+			id
 	)
 	SELECT *
 	FROM matches
@@ -256,20 +255,23 @@ function SearchAlbums_Title($title, $limit)
 {
 	GLOBAL $db;
 	GLOBAL $album_fields;
-	$q = "WITH matches(
+	$q = "WITH matches AS (
+		SELECT
 			$album_fields,
 			GROUP_CONCAT(b.alias, '|') AS aliases
 		FROM
-			albums a
+			albums
 		NATURAL JOIN
 			album_aliases b
 		GROUP BY
-			a.id
+			albums.id
 		)
-	SELECT $album_fields
-	WHERE title LIKE '%".$db->real_escape_string($title)."%'";
+	SELECT *
+	FROM matches
+	WHERE title LIKE '%".$db->real_escape_string($title)."%'
+	OR aliases LIKE '%".$db->real_escape_string($title)."%'";
 	if(isset($limit))
-		$q .= "LIMIT $limit";
+		$q .= " LIMIT $limit";
 	$q .= ";";
 	$result = $db->query($q);
 	if($result === false)
@@ -284,23 +286,26 @@ function SearchArtists_Name($title, $limit)
 {
 	GLOBAL $db;
 	GLOBAL $artist_fields;
-	$q = "WITH matches(
+	$q = "WITH matches AS (
+		SELECT
 			$artist_fields,
 			GROUP_CONCAT(b.alias, '|') AS aliases,
 			GROUP_CONCAT(c.country, '|') AS countries
 		FROM
-			artists a
-		NATURAL JOIN
+			artists
+		NATURAL LEFT JOIN
 			artist_aliases b
-		NATURAL JOIN
+		NATURAL LEFT JOIN
 			artist_countries c
 		GROUP BY
-			a.id
+			artists.id
 		)
-	SELECT $album_fields
-	WHERE title LIKE '%".$db->real_escape_string($title)."%'";
+	SELECT *
+	FROM matches
+	WHERE name LIKE '%".$db->real_escape_string($title)."%'
+	OR aliases LIKE '%".$db->real_escape_string($title)."%'";
 	if(isset($limit))
-		$q .= "LIMIT $limit";
+		$q .= " LIMIT $limit";
 	$q .= ";";
 	$result = $db->query($q);
 	if($result === false)

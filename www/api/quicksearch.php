@@ -37,8 +37,8 @@
 
 	$search_text = $db->real_escape_string($_GET["query"]);
 
-	//$response = ["songs" => SearchSongs_Title($search_text, $limit), "videos" => SearchVideos_Title($search_text, $limit), "albums" => SearchAlbums_Title($search_text, $limit), "artists" => SearchArtists_Name($search_text, $limit)];
-	$response = ["songs" => GetSongInfo_rand(2), "videos" => GetVideoInfo_rand(2), "albums" => GetAlbumInfo_rand(2, true), "artists" => GetArtistInfo_rand(2)];
+	$response = ["songs" => SearchSongs_Title($search_text, $limit), "videos" => SearchVideos_Title($search_text, $limit), "albums" => SearchAlbums_Title($search_text, $limit), "artists" => SearchArtists_Name($search_text, $limit)];
+	//$response = ["songs" => GetSongInfo_rand(2), "videos" => GetVideoInfo_rand(2), "albums" => GetAlbumInfo_rand(2, true), "artists" => GetArtistInfo_rand(2)];
 
 	header("Content-Type: application/json");
 	echo json_encode($response);
