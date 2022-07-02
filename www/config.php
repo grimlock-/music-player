@@ -5,6 +5,7 @@ $dbuser = "music";
 $dbpass = "music";
 $dbport = "3306";
 $artist_info_file = "artist.nfo";
+$artist_tile_file = "tile.png";
 $album_info_file = "album.nfo";
 $album_art_filename = "FullCover";
 $album_art_directory = "art/albums/";

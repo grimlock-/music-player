@@ -11,6 +11,14 @@
 	<link rel="preload" href="img/album.png" as="image" />
 	<link rel="preload" href="img/noartist.png" as="image" />
 	<script>
+	<?php
+		include("config.php");
+		echo "var thumbnail_format = \"$thumbnail_format\";
+		var album_art_directory = \"$album_art_directory\";
+		var song_art_directory = \"$song_art_directory\";
+		var album_thumbnail_directory = \"$album_thumbnail_directory\";
+		var song_thumbnail_directory = \"$song_thumbnail_directory\";";
+	?>
 	let ua = navigator.userAgent || navigator.vendor || window.opera;
 	if(/windows phone/i.test(ua) ||
 	/android/i.test(ua) ||
@@ -72,8 +80,8 @@
 		</div>
 		<div id="items">
 		</div>
-		<div id="collection_items" class="hidden">
-			<input type="image" src="img/close.png" />
+		<div id="collection_spotlight" class="hidden">
+			<input type="image" class="close" src="img/close.png" />
 			<h3 id="title">Collection title here</h3>
 			<img src="img/album.png">
 		</div>

@@ -460,8 +460,7 @@ let Timeline = {
 		let albumInner = document.createElement("div");
 		albumInner.style.position = "relative";
 		albumInner.style.height = "auto";
-		//FIXME - the full art isn't always going to be jpg
-		albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + "art/albums/" + albumObj.id + ".jpg\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
+		albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_thumbnail_directory + albumObj.id + "." + thumbnail_format + "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
 		albumDiv.onmouseenter = _albumMouseenter;
 		albumDiv.onmouseleave = _albumMouseleave;
 		let i = document.createElement("img");
@@ -471,7 +470,7 @@ let Timeline = {
 		i.setAttribute("width", 200);
 		i.setAttribute("height", 200);
 		//FIXME - have to get thumbnail format from server
-		i.setAttribute("src", location.href + "thumbnails/albums/" + albumObj.id + "_400.jpg");
+		i.setAttribute("src", location.href + album_thumbnail_directory + albumObj.id + "_400." + thumbnail_format);
 		i.setAttribute("alt", albumObj.name);
 		albumInner.appendChild(i);
 		albumDiv.appendChild(albumInner);
@@ -762,7 +761,7 @@ let Albums = {
 			let albumInner = document.createElement("div");
 			albumInner.style.position = "relative";
 			albumInner.style.height = "auto";
-			albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + "art/albums/" + album.id + ".jpg\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
+			albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_thumbnail_directory + album.id + "." + thumbnail_format+ "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
 			albumDiv.onmouseenter = _albumMouseenter;
 			albumDiv.onmouseleave = _albumMouseleave;
 			let i = document.createElement("img");
@@ -770,7 +769,7 @@ let Albums = {
 			i.setAttribute("width", 200);
 			i.setAttribute("height", 200);
 			//FIXME - have to get thumbnail format from server
-			i.setAttribute("src", location.href + "thumbnails/albums/" + album.id + "_400.jpg");
+			i.setAttribute("src", location.href + album_thumbnail_directory + album.id + "_400." + thumbnail_format);
 			i.setAttribute("alt", album.name);
 			albumInner.appendChild(i);
 			albumDiv.appendChild(albumInner);
@@ -956,7 +955,7 @@ let Random = {
 			let albumInner = document.createElement("div");
 			albumInner.style.position = "relative";
 			albumInner.style.height = "auto";
-			albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + "art/albums/" + album.id + ".jpg\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
+			albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + "art/albums/" + album.id + "." + thumbnail_format + "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
 			albumDiv.onmouseenter = _albumMouseenter;
 			albumDiv.onmouseleave = _albumMouseleave;
 			let i = document.createElement("img");
@@ -964,7 +963,7 @@ let Random = {
 			i.setAttribute("width", 200);
 			i.setAttribute("height", 200);
 			//FIXME - have to get thumbnail format from server
-			i.setAttribute("src", location.href + "thumbnails/albums/" + album.id + "_400.jpg");
+			i.setAttribute("src", location.href + album_thumbnail_directory + album.id + "_400." + thumbnail_format);
 			i.setAttribute("alt", album.name);
 			albumInner.appendChild(i);
 			albumDiv.appendChild(albumInner);
