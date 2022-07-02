@@ -102,15 +102,23 @@
 	if(!empty($_POST["thumbq"])) $thumb_quality = $_POST["thumbq"];
 	if(!empty($_POST["reinstall"])) $reinstall = true;
 
-	//Sanity checks
+	//Directory checks
 	if(substr($album_art_directory, -1) != "/")
 		$album_art_directory .= "/";
+	if(!file_exists($album_art_directory))
+		mkdir($album_art_directory, 0755, true);
 	if(substr($song_art_directory, -1) != "/")
 		$song_art_directory .= "/";
+	if(!file_exists($song_art_directory))
+		mkdir($song_art_directory, 0755, true);
 	if(substr($song_thumbnail_directory, -1) != "/")
 		$song_thumbnail_directory .= "/";
+	if(!file_exists($song_thumbnail_directory))
+		mkdir($song_thumbnail_directory, 0755, true);
 	if(substr($album_thumbnail_directory, -1) != "/")
 		$album_thumbnail_directory .= "/";
+	if(!file_exists($album_thumbnail_directory))
+		mkdir($album_thumbnail_directory, 0755, true);
 	//album types
 	if(!is_array($_POST["album_types"]))
 		kill("No album types provided");

@@ -17,6 +17,7 @@
 	 */
 
 	require("../util.php");
+	require("../config.php");
 
 	if($_SERVER['REQUEST_METHOD'] === 'POST')
 	{
@@ -47,10 +48,14 @@
 	}
 	else if($_SERVER['REQUEST_METHOD'] === 'GET')
 	{
-		$thumbs = file_exists("thumbnails.lock");
-
 		header("Content-Type: application/json");
-		$response = ["generating_thumbs" => $thumbs];
+		$response = [
+			"generating_thumbs" => file_exists("thumbnails.lock"),
+			"missing_album_art" => !file_exists("../$album_art_directory"),
+			"missing_song_art" => !file_exists("../$song_art_directory"),
+			"missing_album_thumbnail" => !file_exists("../$album_thumbnail_directory"),
+			"missing_song_thumbnail" => !file_exists("../$song_thumbnail_directory")
+		];
 		echo json_encode($response);
 	}
 ?>

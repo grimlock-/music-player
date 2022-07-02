@@ -12,7 +12,7 @@
 	<link rel="preload" href="img/noartist.png" as="image" />
 	<script>
 	<?php
-		include("config.php");
+		require("config.php");
 		echo "var thumbnail_format = \"$thumbnail_format\";
 		var album_art_directory = \"$album_art_directory\";
 		var song_art_directory = \"$song_art_directory\";

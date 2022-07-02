@@ -20,6 +20,9 @@
 			background-color: #e5e5e5;
 			color: grey;
 		}
+		.warning {
+			background-color: yellow;
+		}
 	</style>
 	<script>
 		let import_btn, import_running = false;
@@ -227,6 +230,8 @@
 		}
 		function thumbs_status_callback()
 		{
+			let warn_div = document.getElementById("warnings");
+			warn_div.innerHTML = "";
 			let result = "";
 			try {
 				result = JSON.parse(this.responseText);
@@ -242,9 +247,44 @@
 				if(thumbnail_running)
 					setTimeout(request_thumbs_status, 2000);
 			}
+			else if(result.missing_album_art || result.missing_song_art ||
+				result.missing_album_thumbnail || result.missing_song_thumbnail)
+			{
+				let ele;
+				if(result.missing_album_art)
+				{
+					ele = document.createElement("div");
+					ele.innerHTML = "No album art directory";
+					ele.classList.add("warning");
+					warn_div.appendChild(ele);
+				}
+				if(result.missing_song_art)
+				{
+					ele = document.createElement("div");
+					ele.innerHTML = "No song art directory";
+					ele.classList.add("warning");
+					warn_div.appendChild(ele);
+				}
+				if(result.missing_album_thumbnail)
+				{
+					ele = document.createElement("div");
+					ele.innerHTML = "No album thumbnail directory";
+					ele.classList.add("warning");
+					warn_div.appendChild(ele);
+				}
+				if(result.missing_song_thumbnail)
+				{
+					ele = document.createElement("div");
+					ele.innerHTML = "No song thumbnail directory";
+					ele.classList.add("warning");
+					warn_div.appendChild(ele);
+				}
+				thumbnail_running = false;
+				disable_thumbnail_button();
+				setTimeout(request_thumbs_status, 2000);
+			}
 			else if(!result.generating_thumbs)
 			{
-				console.log("Not generating thumbnails");
 				thumbnail_running = false;
 				enable_thumbnail_button();
 			}
@@ -276,6 +316,8 @@
 	<div>Directories:</div>
 	<div id="dirs">
 		<?php
+		require("config.php");
+
 		$dirs = file_get_contents("directories.txt");
 		if($dirs)
 		{
@@ -299,6 +341,7 @@
 		<button id="import_button" class="disabled">Import</button>
 		<button id="thumbnail_button" class="disabled">Generate thumbnails</button>
 	</div>
+	<div id="warnings"></div>
 	<div id="status"></div>
 </body>
 </html>
