@@ -27,7 +27,7 @@
 		$before = $_GET["before"];
 	if(isset($_GET["after"]) && preg_match("^[0-9]{4}-[0-9]{2}-[0-9]{2}$", $_GET["after"]))
 		$after = $_GET["after"];
-	if(isset($_GET["album"] && strlen($_GET["album"] == 10))
+	if(isset($_GET["album"] && strlen($_GET["album"] == 10)))
 		$album = $_GET["album"];
 	if(isset($_GET["qt"]) && is_numeric($_GET["qt"]))
 		$qt = $_GET["qt"];

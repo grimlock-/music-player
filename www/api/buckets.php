@@ -40,9 +40,11 @@ switch($_GET["type"])
 {
 	case "albums":
 		$table = "albums";
+		$field = "title";
 		$addtypes = true;
 	break;
 	case "artists":
+		$field = "name";
 		$table = "artists";
 	break;
 	default:
@@ -50,7 +52,7 @@ switch($_GET["type"])
 	break;
 }
 
-$result = $db->query("SELECT DISTINCT LEFT(name, 1) AS a FROM $table ORDER BY a;");
+$result = $db->query("SELECT DISTINCT LEFT($field, 1) AS a FROM $table ORDER BY a;");
 if($result === false)
 	kill("Error getting buckets");
 $items = $result->fetch_all();

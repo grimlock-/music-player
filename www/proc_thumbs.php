@@ -364,7 +364,7 @@ foreach($albumdirs as $albumdir)
 		$primaryname = substr($album["names"], 0, strpos($album["names"], ";"));
 	else
 		$primaryname = $album["names"];
-	$q = "SELECT id FROM albums WHERE name REGEXP '^".$db->real_escape_string(escRegex($primaryname))."(;|$)';";
+	$q = "SELECT id FROM albums WHERE title = '".$db->real_escape_string($primaryname)."';";
 	$result = $db->query($q);
 	if(!$result || $result->num_rows == 0)
 	{

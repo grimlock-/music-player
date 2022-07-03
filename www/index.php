@@ -82,8 +82,10 @@
 		</div>
 		<div id="collection_spotlight" class="hidden">
 			<input type="image" class="close" src="img/close.png" />
-			<h3 id="title">Collection title here</h3>
+			<h3 class="collection_title">Collection title here</h3>
 			<img src="img/album.png">
+			<div class="album_aliases"></div>
+			<div id="collection_items"></div>
 		</div>
 	</template>
 	<template id="artists_template">

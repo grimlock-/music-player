@@ -211,6 +211,7 @@ function _albumArtError(error)
 
 
 
+
 let Timeline = {
 	initialized: false,
 	songs: null,
@@ -683,7 +684,7 @@ let Artists = {
 		this.generateLetterBuckets(this.buckets, letterHolder);
 	},
 	Apply: function(data) {
-		data.sort(Util.SortAlbumsByName_Asc);
+		data.sort(Util.SortAlbumsByTitle_Asc);
 		let container = document.getElementById("artists");
 		for(let artist of data)
 		{
@@ -695,6 +696,9 @@ let Artists = {
 			ele.innerHTML = "<h2>" + primaryName + "</h2>";
 			container.appendChild(ele);
 		}
+	},
+	Out: function() {
+
 	},
 	artists: null,
 	buckets: null,
@@ -751,7 +755,7 @@ let Albums = {
 		this.generateLetterBuckets(this.buckets, letterHolder);
 	},
 	Apply: function(data) {
-		data.sort(Util.SortAlbumsByName_Asc);
+		data.sort(Util.SortAlbumsByTitle_Asc);
 		let container = document.getElementById("albums");
 		for(let album of data)
 		{
@@ -797,6 +801,8 @@ let Albums = {
 			container.appendChild(albumDiv);
 		}
 		this.ApplyFilters();
+	},
+	Out: function() {
 	},
 	types: [],
 	buckets: [],

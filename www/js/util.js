@@ -89,10 +89,9 @@ export function SortSongsByImportDate_Desc(first, second)
 {
 	return DateSort(first.import_date, second.import_date, "desc");
 }
-export function SortAlbumsByName_Asc(first, second)
+export function SortAlbumsByTitle_Asc(first, second)
 {
-	return StringSort(first.name, second.name);
-	//return first.name.localeCompare(second.name);
+	return StringSort(first.title, second.title);
 }
 export function SortDates_Desc(first, second)
 {
