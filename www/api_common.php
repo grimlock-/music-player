@@ -161,15 +161,75 @@ function GetAlbumInfo_rand($count, $resolve)
 	return $items;
 }
 
-
-
-function GetAlbumSongs($id, $song_fields = "*")
+function GetAlbumSongs($id)
 {
 	GLOBAL $db;
 	GLOBAL $song_fields;
 
 	$ret = [];
-	$q = "SELECT $song_fields FROM songs WHERE album_id = '$id';";
+	$q = "SELECT $song_fields FROM songs WHERE album_id = '".$db->real_escape_string($id)."';";
+	$result = $db->query($q);
+	if($result !== false)
+	{
+		$songs = $result->fetch_all(MYSQLI_ASSOC);
+		foreach($songs as $song)
+		{
+			$ret[] = array_combine(array_keys($song), array_values($song));
+		}
+	}
+	return $ret;
+}
+
+function GetArtistInfo($id)
+{
+	GLOBAL $db;
+	GLOBAL $artist_fields;
+	
+	$q = "SELECT
+			$artist_fields,
+			GROUP_CONCAT(b.alias, '|') AS aliases,
+			GROUP_CONCAT(c.country, '|') AS countries
+		FROM
+			artists
+		NATURAL LEFT JOIN
+			artist_aliases b
+		NATURAL LEFT JOIN
+			artist_countries c
+		WHERE
+			artists.id = '".$db->real_escape_string($id)."'
+		GROUP BY
+			artists.id;";
+
+	$ret = [];
+	$result = $db->query($q);
+	if($result !== false)
+	{
+		$songs = $result->fetch_all(MYSQLI_ASSOC);
+		foreach($songs as $song)
+		{
+			$ret[] = array_combine(array_keys($song), array_values($song));
+		}
+	}
+	return $ret;
+}
+
+function GetArtistSongs($id)
+{
+	GLOBAL $db;
+	GLOBAL $song_fields;
+
+	$ret = [];
+	$q = "WITH artist_songs AS (
+			SELECT song AS id
+			FROM song_artists
+			WHERE artist = '".$db->real_escape_string($id)."'
+		)
+		SELECT
+			$song_fields
+		FROM
+			artist_songs
+		NATURAL JOIN
+			songs";
 	$result = $db->query($q);
 	if($result !== false)
 	{

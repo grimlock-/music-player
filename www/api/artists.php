@@ -1,5 +1,7 @@
 <?php
-	/*
+	/* List all artist buckets (starting letters) or
+	 * get all artists for the given bucket
+	 *
 	 * GET
 	 * {
 	 *     char (optional): string
@@ -32,6 +34,7 @@
 	 
 	require("../config.php");
 	require("../util.php");
+	require("../api_common.php");
 
 	$response = null;
 

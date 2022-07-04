@@ -13,7 +13,7 @@ PlayPause,
 CurrentView,
 CurrentSection,
 ChangingViews = false;
-const API = location.href + "api/";
+const API = location.href.substring(0, location.href.indexOf('#')) + "api/";
 
 function XhrErrorCheck(response, errMsg1 = "", errMsg2 = "")
 {
@@ -34,18 +34,18 @@ function XhrErrorCheck(response, errMsg1 = "", errMsg2 = "")
 
 	return obj;
 }
-function SetView(view, section = "default")
+window.SetView = function(view, section = "default")
 {
 	if(!view || ChangingViews)
 		return;
 
 	ChangingViews = true;
 	let viewObj = Views.Get(CurrentView || Config.Get("default_view"));
-	if(viewObj.initialized)
+	if(viewObj.initialized && viewObj.Out)
 		viewObj.Out();
 	viewObj = Views.Get(view);
 	if(!viewObj.initialized)
-		viewObj.Init();
+		viewObj.Init(section);
 	else
 		viewObj.Draw();
 
@@ -218,6 +218,8 @@ function SetQuickSearchResults(results)
 	for(let set of order)
 	{
 		//TODO - display aliases
+		//TODO - display artist flags
+		//TODO - display album art
 		if(set == "songs")
 		{
 			for(let item of results.songs)
@@ -264,9 +266,6 @@ QuickSearch.addEventListener("input", _quicksearch);
 QuickSearch.addEventListener("blur", _qsblur);
 QuickSearch.addEventListener("focus", _qsfocus);
 
-//document.addEventListener("pagehide", function(e) {
-	//Queue.Save();
-//});
 PlayPause.addEventListener("click", function(e) {
 	switch(Player.GetState())
 	{

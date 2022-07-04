@@ -85,6 +85,10 @@ export function SortSongsByAlbumName_Asc(first, second)
 			return 0;
 	}
 }
+export function SortSongsByImportDate_Asc(first, second)
+{
+	return DateSort(first.import_date, second.import_date);
+}
 export function SortSongsByImportDate_Desc(first, second)
 {
 	return DateSort(first.import_date, second.import_date, "desc");
@@ -92,6 +96,22 @@ export function SortSongsByImportDate_Desc(first, second)
 export function SortAlbumsByTitle_Asc(first, second)
 {
 	return StringSort(first.title, second.title);
+}
+export function SortAlbumsByTitle_Desc(first, second)
+{
+	return StringSort(first.title, second.title, "desc");
+}
+export function SortArtistsByName_Asc(first, second)
+{
+	return StringSort(first.name, second.name);
+}
+export function SortArtistsByName_Desc(first, second)
+{
+	return StringSort(first.name, second.name, "desc");
+}
+export function SortDates_Asc(first, second)
+{
+	return DateSort(first, second);
 }
 export function SortDates_Desc(first, second)
 {

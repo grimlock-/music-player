@@ -11,7 +11,7 @@
  *         Instantiates the view's template. Some will replace the current view
  *         by clearing the #instance element, others will bring up modals.
  *     *Out()
- *         Called before the initialization of another view
+ *         Called before initializing another view if the current one needs to do cleanup
  *
  * There's also some conventions
  *     *Apply()
@@ -39,6 +39,8 @@ export function Get(name)
 	{
 		case "artists":
 			return Artists;
+		case "artist":
+			return Artist;
 		case "albums":
 			return Albums;
 		case "songs":
@@ -55,8 +57,6 @@ export function Get(name)
 			return Playlists;
 		case "videos":
 			return Videos;
-		case "artist":
-			return Artist;
 
 		default:
 			return Timeline;
@@ -247,11 +247,9 @@ let Timeline = {
 		Instance.querySelector("#medium").addEventListener("click", this.SetSize.bind(this, "medium"));
 		Instance.querySelector("#small").addEventListener("click", this.SetSize.bind(this, "small"));
 		Instance.querySelector(".close").addEventListener("click", this._hideCollection);
-		if(!this.mode)
-			this.SetMode(Config.Get("views.timeline.default_grouping") || "day");
+		this.SetMode(this.mode || Config.Get("views.timeline.default_grouping") || "day");
 		this.Apply(this.songs);
-		if(!this.size)
-			this.SetSize("medium");
+		this.SetSize(this.size || "medium");
 		if(this.lastScrollPosition > 0)
 			Instance.scrollTo(0, this.lastScrollPosition);
 		if(Config.Get("theme") == "theme-one")
@@ -470,7 +468,6 @@ let Timeline = {
 		i.addEventListener("click", this._showCollection);
 		i.setAttribute("width", 200);
 		i.setAttribute("height", 200);
-		//FIXME - have to get thumbnail format from server
 		i.setAttribute("src", location.href + album_thumbnail_directory + albumObj.id + "_400." + thumbnail_format);
 		i.setAttribute("alt", albumObj.name);
 		albumInner.appendChild(i);
@@ -551,14 +548,9 @@ let Timeline = {
 			case "day":
 			case "year":
 			case "month":
-				if(this.mode == mode)
-					return;
+				this.mode = mode
 			break;
-
-			default:
-				return;
 		}
-		this.mode = mode;
 		for(let btn of Instance.querySelectorAll("#group_options button.active"))
 			btn.classList.remove("active");
 		let btn = Instance.querySelector("#"+mode);
@@ -574,9 +566,6 @@ let Timeline = {
 			this.ScrollListener();
 	},
 	SetSize: function(size) {
-		if(this.size == size)
-			return;
-
 		let others;
 		this.size = size;
 		for(let btn of Instance.querySelectorAll("#size_buttons button.active"))
@@ -684,7 +673,7 @@ let Artists = {
 		this.generateLetterBuckets(this.buckets, letterHolder);
 	},
 	Apply: function(data) {
-		data.sort(Util.SortAlbumsByTitle_Asc);
+		data.sort(Util.SortArtistsByTitle_Asc);
 		let container = document.getElementById("artists");
 		for(let artist of data)
 		{
@@ -693,12 +682,10 @@ let Artists = {
 				i = artist.name.length;
 			let primaryName = artist.name.substring(0, i);
 			let ele = document.createElement("div");
-			ele.innerHTML = "<h2>" + primaryName + "</h2>";
+			ele.innerHTML = "<h2><a href='#' data-id='" + artist.id + "'>" + primaryName + "</a></h2>";
+			ele.querySelector("a").addEventListener("click", function(e){SetView("artist", this.dataset.id)});
 			container.appendChild(ele);
 		}
-	},
-	Out: function() {
-
 	},
 	artists: null,
 	buckets: null,
@@ -712,6 +699,43 @@ let Artists = {
 			this.Apply(data);
 		}).bind(this));
 	}
+}
+
+
+let Artist = {
+	initialized: false,
+	Init: async function(artist_id) {
+		await fetch(API + "songs.php?artist=" + artist_id)
+		.then(response => response.json())
+		.then((function(data){
+			if(data.error_message)
+			{
+				Util.DisplayError(data.error_message);
+				return;
+			}
+			this.artist_id = artist_id;
+			this.songs = data.songs;
+			this.Draw();
+			this.initialized = true;
+		}).bind(this))
+		.then(fetch(API + "artist.php?id=" + artist_id))
+		.then(response => response.json())
+		.then((function(data){
+			if(data.error_message)
+			{
+				Util.DisplayError(data.error_message);
+				return;
+			}
+		}).bind(this))
+		.catch(err => Util.DisplayError("Error initializing Artists view: " + err.message));
+	},
+	Draw: function() {
+		
+	},
+	Appy: function(data) {
+	},
+	artist_id: null,
+	songs: null
 }
 
 let Albums = {
@@ -761,7 +785,7 @@ let Albums = {
 		{
 			let albumDiv = document.createElement("div");
 			albumDiv.dataset.albumid = album.id;
-			albumDiv.classList.add("tile_med");
+			albumDiv.classList.add("tile_med", "collection");
 			let albumInner = document.createElement("div");
 			albumInner.style.position = "relative";
 			albumInner.style.height = "auto";
@@ -772,7 +796,6 @@ let Albums = {
 			i.addEventListener("error", _albumArtError);
 			i.setAttribute("width", 200);
 			i.setAttribute("height", 200);
-			//FIXME - have to get thumbnail format from server
 			i.setAttribute("src", location.href + album_thumbnail_directory + album.id + "_400." + thumbnail_format);
 			i.setAttribute("alt", album.name);
 			albumInner.appendChild(i);
@@ -796,13 +819,12 @@ let Albums = {
 			}
 			else
 			{
+				//TODO
 				console.log("Add click listener to fetch album songs");
 			}
 			container.appendChild(albumDiv);
 		}
 		this.ApplyFilters();
-	},
-	Out: function() {
 	},
 	types: [],
 	buckets: [],
@@ -1036,16 +1058,6 @@ let Playlists = {
 };
 
 let Videos = {
-	initialized: false,
-	Init: async function() {
-	},
-	Draw: function() {
-	},
-	Appy: function(data) {
-	}
-}
-
-let Artist = {
 	initialized: false,
 	Init: async function() {
 	},

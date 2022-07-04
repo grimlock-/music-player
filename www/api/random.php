@@ -28,8 +28,6 @@
 	require("../api_common.php");
 	$resolve = false;
 	$type = "song";
-	$songfields = "id,title,track_number,disc_number,genre,artists,duration,art";
-	$albumfields = "id,name,type,artists,release_date";
 
 	if(isset($_GET["type"]))
 		$type = $_GET["type"];
@@ -59,10 +57,7 @@
 				$count = 1;
 			if(isset($_GET["resolve"]))
 				$resolve = true;
-			$q = "SELECT $albumfields FROM albums ORDER BY RAND() LIMIT $count;";
-			$result = $db->query($q);
-			if($result === false)
-				kill("Error getting albums");
+			$result = GetAlbumInfo_rand($count, $resolve);
 		break;
 
 		default:
@@ -75,7 +70,7 @@
 	{
 		$item = array_combine(array_keys($row), array_values($row));
 		if($resolve)
-			$item["songs"] = GetAlbumSongs($row["id"], $songfields);
+			$item["songs"] = GetAlbumSongs($row["id"]);
 		$response["items"][] = $item;
 	}
 
