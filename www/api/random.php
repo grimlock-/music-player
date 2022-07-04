@@ -65,7 +65,7 @@
 		break;
 	}
 
-	$response = ["type" => $type, "items" => []]
+	$response = ["type" => $type, "items" => []];
 	foreach($result as $row)
 	{
 		$item = array_combine(array_keys($row), array_values($row));
