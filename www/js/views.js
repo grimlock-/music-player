@@ -682,7 +682,7 @@ let Artists = {
 				i = artist.name.length;
 			let primaryName = artist.name.substring(0, i);
 			let ele = document.createElement("div");
-			ele.innerHTML = "<h2><a href='#' data-id='" + artist.id + "'>" + primaryName + "</a></h2>";
+			ele.innerHTML = "<h2><a data-id='" + artist.id + "'>" + primaryName + "</a></h2>";
 			ele.querySelector("a").addEventListener("click", function(e){SetView("artist", this.dataset.id)});
 			container.appendChild(ele);
 		}
@@ -713,12 +713,15 @@ let Artist = {
 				Util.DisplayError(data.error_message);
 				return;
 			}
-			this.artist_id = artist_id;
-			this.songs = data.songs;
-			this.Draw();
-			this.initialized = true;
+			this.songs = data;
+			for(let s of data)
+			{
+				if(!Cache.GetSongInfo(s.id))
+					Cache.SetSongInfo(s.id, s);
+			}
 		}).bind(this))
-		.then(fetch(API + "artist_info.php?id=" + artist_id))
+		.catch(err => Util.DisplayError("Error initializing Artists view: " + err.message));
+		await fetch(API + "artist_info.php?id=" + artist_id)
 		.then(response => response.json())
 		.then((function(data){
 			if(data.error_message)
@@ -726,15 +729,37 @@ let Artist = {
 				Util.DisplayError(data.error_message);
 				return;
 			}
+			this.info = data;
+			this.Draw();
+			this.initialized = true;
 		}).bind(this))
 		.catch(err => Util.DisplayError("Error initializing Artists view: " + err.message));
 	},
 	Draw: function() {
+		Clear();
+		LoadTemplate("#artist_template");
 		
+		Instance.querySelector("h1").innerHTML = this.info.name;
+		let text = "";
+		if(this.info.aliases)
+			text += "Aliases: " + this.info.aliases;
+		text += "Countries: " + (this.info.countries || "N/A");
+		text += "Locations: " + (this.info.locations || "N/A");
+		Instance.appendChild(make("div", text));
+		Instance.appendChild(make("h3", "Albums"));
+		Instance.appendChild(make("div", "Put album tiles here with heders for types"));
+		Instance.appendChild(make("h2", "Songs"));
+		let song_container = document.createElement("div");
+		for(let s of this.songs)
+		{
+			song_container.appendChild(make("div", s.title));
+		}
+		Instance.appendChild(song_container);
 	},
-	Appy: function(data) {
+	Out: function() {
+		this.initialized = false;
 	},
-	artist_id: null,
+	info: null,
 	songs: null
 }
 

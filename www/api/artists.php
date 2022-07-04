@@ -1,6 +1,5 @@
 <?php
-	/* List all artist buckets (starting letters) or
-	 * get all artists for the given bucket
+	/* Get all artists for the given bucket (letter)
 	 *
 	 * GET
 	 * {

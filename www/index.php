@@ -93,6 +93,9 @@
 		<div id="group_buttons"></div>
 		<div id="artists"></div>
 	</template>
+	<template id="artist_template">
+		<h1></h1>
+	</template>
 	<template id="albums_template">
 		<h1>Albums</h1>
 		<div id="album_type_filter"></div>

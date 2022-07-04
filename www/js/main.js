@@ -34,6 +34,12 @@ function XhrErrorCheck(response, errMsg1 = "", errMsg2 = "")
 
 	return obj;
 }
+window.make = function(element, content)
+{
+	let ele = document.createElement(element);
+	ele.innerHTML = content;
+	return ele;
+}
 window.SetView = function(view, section = "default")
 {
 	if(!view || ChangingViews)
