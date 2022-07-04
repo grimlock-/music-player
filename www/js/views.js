@@ -718,7 +718,7 @@ let Artist = {
 			this.Draw();
 			this.initialized = true;
 		}).bind(this))
-		.then(fetch(API + "artist.php?id=" + artist_id))
+		.then(fetch(API + "artist_info.php?id=" + artist_id))
 		.then(response => response.json())
 		.then((function(data){
 			if(data.error_message)

@@ -200,16 +200,10 @@ function GetArtistInfo($id)
 		GROUP BY
 			artists.id;";
 
-	$ret = [];
+	$ret = null;
 	$result = $db->query($q);
 	if($result !== false)
-	{
-		$songs = $result->fetch_all(MYSQLI_ASSOC);
-		foreach($songs as $song)
-		{
-			$ret[] = array_combine(array_keys($song), array_values($song));
-		}
-	}
+		$ret = $result->fetch_all(MYSQLI_ASSOC)[0];
 	return $ret;
 }
 
