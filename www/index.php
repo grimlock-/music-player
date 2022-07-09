@@ -81,8 +81,9 @@
 		<div id="items">
 		</div>
 		<div id="collection_spotlight" class="hidden">
-			<input type="image" class="close" src="img/close.png" />
+			<button type="button" class="close"></button>
 			<h3 class="collection_title">Collection title here</h3>
+			<h5 class="album_aliases hidden">Alternate titles</h5>
 			<img src="img/album.png">
 			<div class="album_aliases"></div>
 			<div id="collection_items"></div>
