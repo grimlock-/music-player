@@ -77,10 +77,6 @@ export function SetSearchResults(key, data)
 	SearchResults[key] = data;
 }
 
-let qsTest = [
-	{id: "someidhere"},
-	{id: "someidhere"}
-];
 export function GetSearchResults(key)
 {
 	if(SearchResults !== undefined)

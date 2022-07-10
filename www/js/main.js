@@ -40,6 +40,20 @@ window.make = function(element, content)
 	ele.innerHTML = content;
 	return ele;
 }
+window.$ = function(first, second)
+{
+	if(first instanceof HTMLElement)
+		return first.querySelector(second);
+	else
+		return document.querySelector(first);
+}
+window.$$ = function(first, second)
+{
+	if(first instanceof HTMLElement)
+		return first.querySelectorAll(second);
+	else
+		return document.querySelectorAll(first);
+}
 window.SetView = function(view, section = "default")
 {
 	if(!view || ChangingViews)

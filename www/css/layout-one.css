@@ -16,12 +16,10 @@
 }
 
 .layout-one-grid #categories {
-	/*width: 100%;
-	height: var(--category-row-height);*/
 	display: flex;
 }
 
-.layout-one-grid .catButton {
+.layout-one-grid button.category {
 	border: none;
 	background-color: #4a7cdd;
 	text-align: center;
@@ -30,7 +28,7 @@
 	cursor: pointer;
 	height: 100%;
 }
-.layout-one-grid .catButton.active {
+.layout-one-grid button.category.active {
 	background-color: #2a5cbd;
 	cursor: unset;
 }

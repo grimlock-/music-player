@@ -14,10 +14,10 @@
 	<?php
 		require("config.php");
 		echo "var thumbnail_format = \"$thumbnail_format\";
-		var album_art_directory = \"$album_art_directory\";
-		var song_art_directory = \"$song_art_directory\";
-		var album_thumbnail_directory = \"$album_thumbnail_directory\";
-		var song_thumbnail_directory = \"$song_thumbnail_directory\";";
+		var album_art_path = \"$album_art_directory\";
+		var song_art_path = \"$song_art_directory\";
+		var album_thumbnail_path = \"$album_thumbnail_directory\";
+		var song_thumbnail_path = \"$song_thumbnail_directory\";";
 	?>
 	let ua = navigator.userAgent || navigator.vendor || window.opera;
 	if(/windows phone/i.test(ua) ||
@@ -25,7 +25,7 @@
 	// iOS detection from: http://stackoverflow.com/a/9039885/177710
 	/iPad|iPhone|iPod/.test(ua) && !window.MSStream)
 	{
-		if(confirm("User agent looks like a phone browser. Navigate to mobile page?"))
+		if(confirm("User agent looks like a phone browser. Go to mobile page?"))
 			location.href = "mobile.html";
 	}
 	</script>
@@ -34,16 +34,16 @@
 <body>
 	<div id="content" class="layout-one-grid">
 		<div id="categories">
-			<button type="button" id="timeline_cat" class="catButton" data-view="timeline">Logo</button>
-			<button type="button" id="artists_cat" class="catButton" data-view="artists">Artists</button>
-			<button type="button" id="albums_cat" class="catButton" data-view="albums">Albums</button>
-			<button type="button" id="songs_cat" class="catButton" data-view="songs">Songs</button>
-			<button type="button" id="genres_cat" class="catButton" data-view="genres">Genres</button>
-			<button type="button" id="realtimeline_cat" class="catButton" data-view="real_timeline">Timeline</button>
-			<button type="button" id="favorites_cat" class="catButton" data-view="favorites">Favorites</button>
-			<button type="button" id="random_cat" class="catButton" data-view="random">Random</button>
-			<button type="button" id="playlists_cat" class="catButton" data-view="playlists">Playlists</button>
-			<button type="button" id="videos_cat" class="catButton" data-view="videos">Videos</button>
+			<button type="button" id="timeline_cat" class="category" data-view="timeline">Logo</button>
+			<button type="button" id="artists_cat" class="category" data-view="artists">Artists</button>
+			<button type="button" id="albums_cat" class="category" data-view="albums">Albums</button>
+			<button type="button" id="songs_cat" class="category" data-view="songs">Songs</button>
+			<button type="button" id="genres_cat" class="category" data-view="genres">Genres</button>
+			<button type="button" id="realtimeline_cat" class="category" data-view="real_timeline">Timeline</button>
+			<button type="button" id="favorites_cat" class="category" data-view="favorites">Favorites</button>
+			<button type="button" id="random_cat" class="category" data-view="random">Random</button>
+			<button type="button" id="playlists_cat" class="category" data-view="playlists">Playlists</button>
+			<button type="button" id="videos_cat" class="category" data-view="videos">Videos</button>
 		</div>
 		<input type="search" id="quicksearch" autocomplete="off" placeholder="Quick Search" />
 		<div id="quicksearch_results" class="hidden"></div>
@@ -95,7 +95,16 @@
 		<div id="artists"></div>
 	</template>
 	<template id="artist_template">
-		<h1></h1>
+		<a>Back</a>
+		<h1 id="name"></h1>
+		<div id="aliases"></div>
+		<div id="info"></div>
+		<div id="description"></div>
+		<div id="links"></div>
+		<h3 id="album_header">Albums</h3>
+		<div id="albums"></div>
+		<h3 id="song_header">Songs</h3>
+		<div id="artist_songs"></div>
 	</template>
 	<template id="albums_template">
 		<h1>Albums</h1>

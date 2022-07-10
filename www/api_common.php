@@ -20,7 +20,9 @@ $album_fields = "albums.id,
 		albums.remaster_date";
 $artist_fields = "artists.id,
 		artists.name,
-		artists.locations";
+		artists.locations,
+		artists.description,
+		artists.external_links";
 function GetSongInfo_id(array $ids)
 {
 	GLOBAL $db;

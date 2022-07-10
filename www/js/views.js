@@ -108,8 +108,7 @@ function GenerateLetterBuckets(buckets, container)
 			numFlag = true;
 			elementText = "#";
 		}
-		let b = document.createElement("button");
-		b.innerHTML = elementText;
+		let b = make("button", elementText);
 		b.addEventListener("click", this.GetBucketData.bind(this));
 		if(elementText == "#")
 		{
@@ -459,7 +458,7 @@ let Timeline = {
 		let albumInner = document.createElement("div");
 		albumInner.style.position = "relative";
 		albumInner.style.height = "auto";
-		albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_thumbnail_directory + albumObj.id + "." + thumbnail_format + "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
+		albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_thumbnail_path + albumObj.id + "." + thumbnail_format + "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
 		albumDiv.onmouseenter = _albumMouseenter;
 		albumDiv.onmouseleave = _albumMouseleave;
 		let i = document.createElement("img");
@@ -468,7 +467,7 @@ let Timeline = {
 		i.addEventListener("click", this._showCollection);
 		i.setAttribute("width", 200);
 		i.setAttribute("height", 200);
-		i.setAttribute("src", location.href + album_thumbnail_directory + albumObj.id + "_400." + thumbnail_format);
+		i.setAttribute("src", location.href + album_thumbnail_path + albumObj.id + "_400." + thumbnail_format);
 		i.setAttribute("alt", albumObj.name);
 		albumInner.appendChild(i);
 		albumDiv.appendChild(albumInner);
@@ -529,9 +528,7 @@ let Timeline = {
 			if(data.songs.length == 0)
 			{
 				console.log("Reached end of import timline");
-				let newText = document.createElement("h3");
-				newText.innerHTML = "End of timeline reached";
-				document.getElementById("items").appendChild(newText);
+				document.getElementById("items").appendChild(make("h3", "End of timeline reached"));
 				Instance.removeEventListener("scroll", this._scrollDelegate);
 				return;
 			}
@@ -548,7 +545,7 @@ let Timeline = {
 			case "day":
 			case "year":
 			case "month":
-				this.mode = mode
+				this.mode = mode;
 			break;
 		}
 		for(let btn of Instance.querySelectorAll("#group_options button.active"))
@@ -669,22 +666,21 @@ let Artists = {
 		LoadTemplate("#artists_template");
 
 		//"Letter" buttons
-		let letterHolder = document.getElementById("group_buttons");
-		this.generateLetterBuckets(this.buckets, letterHolder);
+		this.generateLetterBuckets(this.buckets, $("#group_buttons"));
+		if(this.artists !== null)
+			this.Apply(this.artists);
 	},
 	Apply: function(data) {
 		data.sort(Util.SortArtistsByTitle_Asc);
-		let container = document.getElementById("artists");
 		for(let artist of data)
 		{
 			let i = artist.name.indexOf("|");
 			if(i == -1)
 				i = artist.name.length;
 			let primaryName = artist.name.substring(0, i);
-			let ele = document.createElement("div");
-			ele.innerHTML = "<h2><a data-id='" + artist.id + "'>" + primaryName + "</a></h2>";
+			let ele = make("div", "<h2><a data-id='" + artist.id + "'>" + primaryName + "</a></h2>");
 			ele.querySelector("a").addEventListener("click", function(e){SetView("artist", this.dataset.id)});
-			container.appendChild(ele);
+			$("#artists").appendChild(ele);
 		}
 	},
 	artists: null,
@@ -731,33 +727,55 @@ let Artist = {
 			}
 			this.info = data;
 			this.Draw();
-			this.initialized = true;
 		}).bind(this))
 		.catch(err => Util.DisplayError("Error initializing Artists view: " + err.message));
 	},
 	Draw: function() {
 		Clear();
 		LoadTemplate("#artist_template");
-		
-		Instance.querySelector("h1").innerHTML = this.info.name;
-		let text = "";
+
+		Instance.querySelector("a").addEventListener("click", function(e){SetView("artists");});
+		Instance.querySelector("#name").innerHTML = Util.EscHtml(this.info.name);
+
 		if(this.info.aliases)
-			text += "Aliases: " + this.info.aliases;
-		text += "Countries: " + (this.info.countries || "N/A");
-		text += "Locations: " + (this.info.locations || "N/A");
-		Instance.appendChild(make("div", text));
-		Instance.appendChild(make("h3", "Albums"));
-		Instance.appendChild(make("div", "Put album tiles here with heders for types"));
-		Instance.appendChild(make("h2", "Songs"));
-		let song_container = document.createElement("div");
-		for(let s of this.songs)
+			Instance.querySelector("#aliases").innerHTML = Util.EscHtml(this.info.aliases);
+		else
+			Instance.querySelector("#aliases").classList.add("hidden");
+
+		$(Instance, "#info").innerHTML = "Countries: " + (Util.EscHtml(this.info.countries) || "N/A") +
+							" | Locations: " + (Util.EscHtml(this.info.locations) || "N/A");
+
+		if(this.info.external_links)
 		{
-			song_container.appendChild(make("div", s.title));
+			for(let link of this.info.external_links.split('|'))
+			{
+				let ele = make("a");
+				ele.href = link;
+				if(ele.hostname.substring(0, 4) == "www.")
+					ele.innerHTML = ele.hostname.substring(4);
+				else
+					ele.innerHTML = ele.hostname;
+				$(Instance, "#links").appendChild(ele);
+				$(Instance, "#links").appendChild(make("br"));
+			}
 		}
-		Instance.appendChild(song_container);
-	},
-	Out: function() {
-		this.initialized = false;
+
+		if(this.info.description)
+			Util.RenderMarkdown(this.info.description, $(Instance, "#description"));
+		else
+			$(Instance, "#description").classList.add("hidden");
+
+		$(Instance, "#albums").innerHTML = "Put album tiles here with heders for types";
+
+		if(this.songs.length == 0)
+		{
+			$(Instance, "#artist_songs").innerHTML = "No songs from this artist";
+		}
+		else
+		{
+			for(let s of this.songs)
+				$("#artist_songs").appendChild(make("div", s.title));
+		}
 	},
 	info: null,
 	songs: null
@@ -814,14 +832,14 @@ let Albums = {
 			let albumInner = document.createElement("div");
 			albumInner.style.position = "relative";
 			albumInner.style.height = "auto";
-			albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_thumbnail_directory + album.id + "." + thumbnail_format+ "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
+			albumInner.innerHTML = "<input type=\"image\" src=\"img/add.png\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_thumbnail_path + album.id + "." + thumbnail_format+ "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/link.png\"></a>";
 			albumDiv.onmouseenter = _albumMouseenter;
 			albumDiv.onmouseleave = _albumMouseleave;
 			let i = document.createElement("img");
 			i.addEventListener("error", _albumArtError);
 			i.setAttribute("width", 200);
 			i.setAttribute("height", 200);
-			i.setAttribute("src", location.href + album_thumbnail_directory + album.id + "_400." + thumbnail_format);
+			i.setAttribute("src", location.href + album_thumbnail_path + album.id + "_400." + thumbnail_format);
 			i.setAttribute("alt", album.name);
 			albumInner.appendChild(i);
 			albumDiv.appendChild(albumInner);
@@ -1016,7 +1034,7 @@ let Random = {
 			i.setAttribute("width", 200);
 			i.setAttribute("height", 200);
 			//FIXME - have to get thumbnail format from server
-			i.setAttribute("src", location.href + album_thumbnail_directory + album.id + "_400." + thumbnail_format);
+			i.setAttribute("src", location.href + album_thumbnail_path + album.id + "_400." + thumbnail_format);
 			i.setAttribute("alt", album.name);
 			albumInner.appendChild(i);
 			albumDiv.appendChild(albumInner);

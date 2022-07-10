@@ -234,3 +234,7 @@ export function EscHtml(str)
 	}
 	return ret;
 }
+export function RenderMarkdown(string, container)
+{
+	container.innerHTML = string;
+}
