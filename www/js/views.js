@@ -207,6 +207,11 @@ function _albumArtError(error)
 	if(this.src != albumUrl)
 		this.src = albumUrl;
 }
+function _addSong()
+{
+	if(Config.Get("queue.always_append") === true || Queue.IndexOf(this.dataset.id) == -1)
+		Queue.AddSong(this.dataset.id);
+}
 
 
 
@@ -247,7 +252,7 @@ let Timeline = {
 		Instance.querySelector("#small").addEventListener("click", this.SetSize.bind(this, "small"));
 		Instance.querySelector(".close").addEventListener("click", this._hideCollection);
 		this.SetMode(this.mode || Config.Get("views.timeline.default_grouping") || "day");
-		this.Apply(this.songs);
+		//this.Apply(this.songs);
 		this.SetSize(this.size || "medium");
 		if(this.lastScrollPosition > 0)
 			Instance.scrollTo(0, this.lastScrollPosition);
@@ -364,10 +369,7 @@ let Timeline = {
 					let newNode = document.createElement("div");
 					newNode.innerHTML = item.title + " | " + item.artists + " | " + item.genre + " | " + Util.StoMS(item.duration);
 					newNode.dataset.id = item.id;
-					newNode.addEventListener("click", function(){
-						if(Config.Get("queue.always_append") === true || Queue.IndexOf(this.dataset.id) == -1)
-							Queue.AddSong(this.dataset.id);
-					});
+					newNode.addEventListener("click", _addSong);
 					innerWrapper.appendChild(newNode);
 				}
 				else if(artists[artist].length > 1)
@@ -553,14 +555,9 @@ let Timeline = {
 		let btn = Instance.querySelector("#"+mode);
 		btn.classList.add("active");
 
-		if(this.initialized)
-		{
-			document.getElementById("items").innerHTML = "";
-			this.Apply(this.songs);
-		}
-
-		if(this.initialized)
-			this.ScrollListener();
+		document.getElementById("items").innerHTML = "";
+		this.Apply(this.songs);
+		//this.ScrollListener();
 	},
 	SetSize: function(size) {
 		let others;
@@ -630,11 +627,12 @@ let Timeline = {
 				continue;
 			let text = "";
 			let ele = document.createElement("div");
-			ele.dataset.songid = id;
+			ele.dataset.id = id;
 			if(data.track_number)
 				text += data.track_number + " - ";
 			text += data.title + " - " + Util.StoMS(data.duration);
 			ele.innerHTML = text;
+			ele.addEventListener("click", _addSong);
 			container.appendChild(ele);
 		}
 		spot.classList.remove("hidden");
@@ -774,7 +772,12 @@ let Artist = {
 		else
 		{
 			for(let s of this.songs)
-				$("#artist_songs").appendChild(make("div", s.title));
+			{
+				let ele = make("div", s.title);
+				ele.dataset.id = s.id;
+				ele.addEventListener("click", _addSong);
+				$("#artist_songs").appendChild(ele);
+			}
 		}
 	},
 	info: null,
@@ -1006,15 +1009,12 @@ let Random = {
 			newNode.innerHTML += " | " + Util.StoMS(song.duration);
 			newNode.dataset.id = song.id;
 			newNode.dataset.type = "song";
-			newNode.addEventListener("click", function(){
-				if(Config.Get("queue.always_append") === true || Queue.IndexOf(this.dataset.id) == -1)
-					Queue.AddSong(this.dataset.id);
-			});
+			newNode.addEventListener("click", _addSong);
 			container.appendChild(newNode);
 		}
 	},
 	DrawVideos: function(items) {
-		console.error("Random videos not implemented");
+		Util.DisplayError("Random videos not implemented");
 	},
 	DrawAlbums: function(items) {
 		let container = document.getElementById("items");
