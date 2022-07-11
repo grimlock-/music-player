@@ -212,7 +212,94 @@ function _addSong()
 	if(Config.Get("queue.always_append") === true || Queue.IndexOf(this.dataset.id) == -1)
 		Queue.AddSong(this.dataset.id);
 }
+let spotlight_element = null;
+function _showCollection()
+{
+	if(spotlight_element === this)
+		return;
+	spotlight_element = this;
+	let root = GetCollectionRoot(spotlight_element);
+	let spot = document.getElementById("collection_spotlight");
+	let container = document.getElementById("collection_items");
+	container.innerHTML = "";
+	spot.querySelector("img").src = root.querySelector(".cover").src;
+	if(root.querySelector("*[data-title]"))
+	{
+		let t = root.querySelector("*[data-title]").dataset.title;
+		let i = t.indexOf("|");
+		if(i != -1)
+		{
+			let title = t.substring(0, i);
+			spot.querySelector(".collection_title").innerHTML = title;
+			let aa = spot.querySelector(".album_aliases");
+			aa.classList.remove("hidden");
+			aa.innerHTML = t.substring(i+1);
+		}
+		else
+		{
+			spot.querySelector(".collection_title").innerHTML = t;
+			let aa = spot.querySelector(".album_aliases");
+			if(!aa.classList.contains("hidden"))
+				aa.classList.add("hidden");
+		}
+	}
+	for(let song of root.querySelectorAll("*[data-songid]"))
+	{
+		let id = song.dataset.songid;
+		let data = Cache.GetSongInfo(id);
+		if(!data)
+			continue;
+		let text = "";
+		let ele = document.createElement("div");
+		ele.dataset.id = id;
+		if(data.track_number)
+			text += data.track_number + " - ";
+		text += data.title + " - " + Util.StoMS(data.duration);
+		ele.innerHTML = text;
+		ele.addEventListener("click", _addSong);
+		container.appendChild(ele);
+	}
+	spot.classList.remove("hidden");
 
+	//Positioning
+	let rect = spotlight_element.getBoundingClientRect();
+	let spot_rect = spot.getBoundingClientRect();
+	let top = rect.y - 100;
+	if(Config.Get("spotlight.keep_in_view") && top < 45)
+		top = 45;
+	else if(Config.Get("spotlight.keep_in_view") && top > visualViewport.height - spot_rect.height)
+		top = visualViewport.height - spot_rect.height;
+	spot.style.top = top + "px";
+	if(visualViewport.width - rect.right >= spot_rect.width + 20)
+	{
+		spot.style.left = "" + (rect.right + 10) + "px";
+	}
+	else
+	{
+		spot.style.left = "" + (rect.x - 10 - spot_rect.width) + "px";
+		//TODO - set class on spotlight making stuff right aligned
+	}
+}
+function HideCollection()
+{
+	document.getElementById("collection_spotlight").classList.add("hidden");
+	spotlight_element = null;
+}
+function UpdateSpotlightPosition()
+{
+	if(spotlight_element === null)
+		return;
+	let rect = spotlight_element.getBoundingClientRect();
+	let spot_rect = $("#collection_spotlight").getBoundingClientRect();
+	let top = rect.y - 100;
+	if(Config.Get("spotlight.keep_in_view") && top < 45)
+		top = 45;
+	else if(Config.Get("spotlight.keep_in_view") && top > visualViewport.height - spot_rect.height)
+		top = visualViewport.height - spot_rect.height;
+	$("#collection_spotlight").style.top = top + "px";
+}
+document.getElementById("collection_spotlight").querySelector(".close").addEventListener("click", HideCollection);
+document.getElementById("main_panel").addEventListener("scroll", UpdateSpotlightPosition);
 
 
 
@@ -236,10 +323,10 @@ let Timeline = {
 			}
 			this.songs = data.songs;
 			this.lastDate = data.last_date;
-			this.Draw();
-			this.initialized = true;
 		}).bind(this))
 		.catch(err => Util.DisplayError("Error initializing Import Timeline view: " + err.message));
+		this.Draw();
+		this.initialized = true;
 	},
 	Draw: function() {
 		Clear();
@@ -250,14 +337,13 @@ let Timeline = {
 		Instance.querySelector("#large").addEventListener("click", this.SetSize.bind(this, "large"));
 		Instance.querySelector("#medium").addEventListener("click", this.SetSize.bind(this, "medium"));
 		Instance.querySelector("#small").addEventListener("click", this.SetSize.bind(this, "small"));
-		Instance.querySelector(".close").addEventListener("click", this._hideCollection);
 		this.SetMode(this.mode || Config.Get("views.timeline.default_grouping") || "day");
 		//this.Apply(this.songs);
 		this.SetSize(this.size || "medium");
 		if(this.lastScrollPosition > 0)
 			Instance.scrollTo(0, this.lastScrollPosition);
 		if(Config.Get("theme") == "theme-one")
-			Instance.addEventListener("scroll", this._scrollDelegate);
+			$("#main_panel").addEventListener("scroll", this._scrollDelegate);
 	},
 	Apply: function(data) {
 		let groups;
@@ -399,7 +485,7 @@ let Timeline = {
 					newNode.onmouseleave = _albumMouseleave;
 					let i = document.createElement("img");
 					i.classList.add("cover");
-					i.addEventListener("click", this._showCollection);
+					i.addEventListener("click", _showCollection);
 					i.setAttribute("width", 200);
 					i.setAttribute("height", 200);
 					if(artist == "No Artist")
@@ -436,7 +522,7 @@ let Timeline = {
 		}
 	},
 	Out: function() {
-		Instance.removeEventListener("scroll", this._scrollDelegate);
+		$("#main_panel").removeEventListener("scroll", this._scrollDelegate);
 	},
 	RenderAlbum: function(albumObj, container) {
 		if(!albumObj.id)
@@ -466,7 +552,7 @@ let Timeline = {
 		let i = document.createElement("img");
 		i.classList.add("cover");
 		i.addEventListener("error", _albumArtError);
-		i.addEventListener("click", this._showCollection);
+		i.addEventListener("click", _showCollection);
 		i.setAttribute("width", 200);
 		i.setAttribute("height", 200);
 		i.setAttribute("src", location.href + album_thumbnail_path + albumObj.id + "_400." + thumbnail_format);
@@ -501,8 +587,9 @@ let Timeline = {
 	},
 	_scrollDelegate: null,
 	ScrollListener: function() {
-		this.lastScrollPosition = Instance.scrollTop;
-		if(!Instance.scrollTopMax)
+		let mp = $("#main_panel");
+		this.lastScrollPosition = mp.scrollTop;
+		if(!mp.scrollTopMax)
 		{
 			if(!this.requestingNextChunk)
 				this.GetNextChunk();
@@ -512,7 +599,7 @@ let Timeline = {
 			let trigger = Config.Get("views.timeline.next_chunk_scroll_percent");
 			if(trigger > 1)
 				trigger = trigger / 100;
-			if(Instance.scrollTop / Instance.scrollTopMax >= trigger && !this.requestingNextChunk)
+			if(mp.scrollTop / mp.scrollTopMax >= trigger && !this.requestingNextChunk)
 				this.GetNextChunk();
 		}
 	},
@@ -592,53 +679,6 @@ let Timeline = {
 		}
 		if(this.initialized)
 			this.ScrollListener();
-	},
-	_showCollection: function() {
-		let root = GetCollectionRoot(this);
-		let spot = document.getElementById("collection_spotlight");
-		let container = document.getElementById("collection_items");
-		container.innerHTML = "";
-		spot.querySelector("img").src = root.querySelector(".cover").src;
-		if(root.querySelector("*[data-title]"))
-		{
-			let t = root.querySelector("*[data-title]").dataset.title;
-			let i = t.indexOf("|");
-			if(i != -1)
-			{
-				let title = t.substring(0, i);
-				spot.querySelector(".collection_title").innerHTML = title;
-				let aa = spot.querySelector(".album_aliases");
-				aa.classList.remove("hidden");
-				aa.innerHTML = t.substring(i+1);
-			}
-			else
-			{
-				spot.querySelector(".collection_title").innerHTML = t;
-				let aa = spot.querySelector(".album_aliases");
-				if(!aa.classList.contains("hidden"))
-					aa.classList.add("hidden");
-			}
-		}
-		for(let song of root.querySelectorAll("*[data-songid]"))
-		{
-			let id = song.dataset.songid;
-			let data = Cache.GetSongInfo(id);
-			if(!data)
-				continue;
-			let text = "";
-			let ele = document.createElement("div");
-			ele.dataset.id = id;
-			if(data.track_number)
-				text += data.track_number + " - ";
-			text += data.title + " - " + Util.StoMS(data.duration);
-			ele.innerHTML = text;
-			ele.addEventListener("click", _addSong);
-			container.appendChild(ele);
-		}
-		spot.classList.remove("hidden");
-	},
-	_hideCollection: function() {
-		document.getElementById("collection_spotlight").classList.add("hidden");
 	}
 }
 
@@ -832,6 +872,7 @@ let Albums = {
 			let albumDiv = document.createElement("div");
 			albumDiv.dataset.albumid = album.id;
 			albumDiv.classList.add("tile_med", "collection");
+			albumDiv.addEventListener("click", _showCollection);
 			let albumInner = document.createElement("div");
 			albumInner.style.position = "relative";
 			albumInner.style.height = "auto";
@@ -839,6 +880,7 @@ let Albums = {
 			albumDiv.onmouseenter = _albumMouseenter;
 			albumDiv.onmouseleave = _albumMouseleave;
 			let i = document.createElement("img");
+			i.classList.add("cover");
 			i.addEventListener("error", _albumArtError);
 			i.setAttribute("width", 200);
 			i.setAttribute("height", 200);

@@ -35,7 +35,7 @@ const defaultSettings =
 	views: {
 		timeline: {
 			default_grouping: "month",
-			next_chunk_scroll_percent: 90
+			next_chunk_scroll_percent: 80
 		},
 		artists: {
 			//When getting all items for a letter, include items that have punctuation before the given character
@@ -66,6 +66,9 @@ const defaultSettings =
 	lastfm: {
 		scrobbling_enabled: false,
 		api_key: ""
+	},
+	spotlight: {
+		keep_in_view: true
 	}
 };
 const Constraints =

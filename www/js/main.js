@@ -97,6 +97,7 @@ function RefreshViewIndicator()
 	}
 }
 
+
 //Start
 Config.Init();
 QuickSearch = document.getElementById("quicksearch");
@@ -179,6 +180,7 @@ for(let button of document.querySelectorAll("*[data-view]"))
 		button.classList.add("active");
 }
 
+//Quicksearch
 function _quicksearch(e)
 {
 	let ele = this;

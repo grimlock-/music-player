@@ -113,3 +113,21 @@ body {
 	height: 40px;
 }
 
+#collection_spotlight {
+	background-color: cyan;
+	position: absolute;
+	width: 540px;
+	z-index: 1;
+}
+#collection_spotlight .close {
+	float: right;
+	margin-top: 5px;
+	margin-right: 5px;
+}
+#collection_spotlight img {
+	width: 200px;
+	height: 200px;
+}
+#collection_items {
+	overflow: auto;
+}

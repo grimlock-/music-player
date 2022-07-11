@@ -60,18 +60,20 @@
 		</div>
 		<div id="divider"></div>
 		<div id="art" class="hidden"></div>
-		<div id="instance"></div>
+		<div id="main_panel">
+			<div id="collection_spotlight" class="hidden">
+				<button type="button" class="close"></button>
+				<h3 class="collection_title">Collection title here</h3>
+				<h5 class="album_aliases hidden">Alternate titles</h5>
+				<img src="img/album.png">
+				<div class="album_aliases"></div>
+				<div id="collection_items"></div>
+			</div>
+			<div id="instance"></div>
+		</div>
 		<div id="messages" class="hidden"></div>
 	</div>
 	<template id="timeline_template">
-		<div id="collection_spotlight" class="hidden">
-			<button type="button" class="close"></button>
-			<h3 class="collection_title">Collection title here</h3>
-			<h5 class="album_aliases hidden">Alternate titles</h5>
-			<img src="img/album.png">
-			<div class="album_aliases"></div>
-			<div id="collection_items"></div>
-		</div>
 		<h1>Collection Timeline</h1>
 		<div id="group_options">
 			<button type="button" id="year">Year</button>
