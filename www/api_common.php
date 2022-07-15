@@ -151,7 +151,7 @@ function GetVideoInfo_rand($count)
 	return $items;
 }
 
-function GetAlbumInfo_rand($count, $resolve)
+function GetAlbumInfo_rand($count)
 {
 	GLOBAL $db;
 	GLOBAL $album_fields;
@@ -163,13 +163,16 @@ function GetAlbumInfo_rand($count, $resolve)
 	return $items;
 }
 
-function GetAlbumSongs($id)
+function GetAlbumSongs($id, $return_info = true)
 {
 	GLOBAL $db;
 	GLOBAL $song_fields;
 
 	$ret = [];
-	$q = "SELECT $song_fields FROM songs WHERE album_id = '".$db->real_escape_string($id)."';";
+	if($return_info)
+		$q = "SELECT $song_fields FROM songs WHERE album_id = '".$db->real_escape_string($id)."';";
+	else
+		$q = "SELECT id FROM songs WHERE album_id = '".$db->real_escape_string($id)."';";
 	$result = $db->query($q);
 	if($result !== false)
 	{
@@ -371,4 +374,60 @@ function SearchArtists_Name($title, $limit)
 	else
 		return $result->fetch_all(MYSQLI_ASSOC);
 }
+
+function GetSongFilepath($id)
+{
+	GLOBAL $db;
+	$q = "SELECT filepath FROM songs WHERE id = '".$db->real_escape_string($id)."';";
+	$result = $db->query($q);
+	if($result === false || $result->num_rows == 0)
+		kill("Invalid id");
+	$row = $result->fetch_row();
+	return $row[0];
+}
+function GetSongFilepaths($ids)
+{
+	GLOBAL $db;
+
+	if(gettype($ids) == "string")
+		$idselect = "'".implode("' UNION SELECT '", explode(',', $db->real_escape_string($ids)))."'";
+	else if(gettype($ids) == "array")
+		$idselect = "'".implode("' UNION SELECT '", $db->real_escape_string($ids))."'";
+	else
+		kill("Bad argument - internal");
+
+	$q = "WITH song_ids(id) AS (
+			SELECT $idselect
+		)
+		SELECT
+			b.filepath
+		FROM
+			song_ids a
+		JOIN
+			songs b
+		ON
+			a.id = b.id;";
+	$result = $db->query($q);
+	if($result === false || $result->num_rows == 0)
+		kill("Error getting song filepaths");
+	$ret = [];
+	while($row = $result->fetch_row)
+		$ret[] = $row[0];
+	return $ret;
+}
+function GetAlbumFilepaths($id)
+{
+	GLOBAL $db;
+
+	$q = "SELECT filepath FROM songs WHERE album_id = '".$db->real_escape_string($id)."';";
+	$result = $db->query($q);
+	if($result === false || $result->num_rows == 0)
+		kill("Invalid id");
+
+	$ret = [];
+	while($row = $result->fetch_row())
+		$ret[] = $row[0];
+	return $ret;
+}
+
 ?>

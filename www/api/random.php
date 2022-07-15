@@ -57,7 +57,7 @@
 				$count = 1;
 			if(isset($_GET["resolve"]))
 				$resolve = true;
-			$result = GetAlbumInfo_rand($count, $resolve);
+			$result = GetAlbumInfo_rand($count);
 		break;
 
 		default:

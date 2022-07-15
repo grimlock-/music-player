@@ -32,6 +32,7 @@ In Windows, the library scan/import and thumbnail generation scripts must be man
   * php-mysql
   * php-gd
     * Package name might have version info like ``php7.0-gd``
+  * php-zip
   * [getID3](http://getid3.sourceforge.net/)
     * When looking at track metadata, only the first element in each array is analyzed
   * mysql
