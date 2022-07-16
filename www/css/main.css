@@ -129,6 +129,8 @@ body {
 	position: absolute;
 	width: 540px;
 	z-index: 1;
+	overflow: auto;
+	max-height: 85%;
 }
 #collection_spotlight .close {
 	float: right;
