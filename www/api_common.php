@@ -392,7 +392,7 @@ function GetSongFilepaths($ids)
 	if(gettype($ids) == "string")
 		$idselect = "'".implode("' UNION SELECT '", explode(',', $db->real_escape_string($ids)))."'";
 	else if(gettype($ids) == "array")
-		$idselect = "'".implode("' UNION SELECT '", $db->real_escape_string($ids))."'";
+		$idselect = "'".implode("' UNION SELECT '", $ids)."'";
 	else
 		kill("Bad argument - internal");
 
@@ -409,9 +409,9 @@ function GetSongFilepaths($ids)
 			a.id = b.id;";
 	$result = $db->query($q);
 	if($result === false || $result->num_rows == 0)
-		kill("Error getting song filepaths");
+		kill("Error getting song filepaths: $idselect");
 	$ret = [];
-	while($row = $result->fetch_row)
+	while($row = $result->fetch_row())
 		$ret[] = $row[0];
 	return $ret;
 }

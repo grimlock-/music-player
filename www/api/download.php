@@ -1,9 +1,10 @@
 <?php
 	/*
-	 * Endpoint to get binary song data
+	 * Endpoint for downloading songs and collections of songs
 	 * 
 	 * Args:
 	 *     id: string
+	 *     type: string
 	 *
 	 * Error response:
 	 * {
@@ -30,8 +31,9 @@
 			kill("File not found or not readable");
 		header("Content-Type: ".mime_content_type($fpath));
 		header("Content-Length: ".filesize($fpath));
-		$fhandle = fopen($fpath, "rb");
-		fpassthru($fhandle);
+		readfile($fpath);
+		/*$fhandle = fopen($fpath, "rb");
+		fpassthru($fhandle);*/
 		exit;
 	}
 
@@ -62,30 +64,42 @@
 	if($db->connect_errno)
 		kill("Database connection failed (".$db->connect_errno."): ".$db->connect_error);
 
-	$id = $db->real_escape_string($id);
+	$id = $db->real_escape_string($_GET["id"]);
 	switch($type)
 	{
 		case "album":
-			$songs = GetAlbumFilepaths($db->real_escape_string($_GET["id"]));
+			$songs = GetAlbumFilepaths($id);
 		case "playlist":
-			$songs = GetPlaylistFilepaths($db->real_escape_string($_GET["id"]));
+			$songs = GetPlaylistFilepaths($id);
 		case "song":
 			if(strpos($_GET["id"], ',') !== false)
 				$songs = GetSongFilepaths(explode(',', $id));
 			else
-				HandleSingleSong($db->real_escape_string($_GET["id"]));
+				HandleSingleSong($id);
 		break;
 	}
 
-	/*$zfile = tmpfile();
-	if($zfile === false)
-		kill("Unable to create archive");
-	$zip = new ZipArchive();*/
+	$fname = tempnam(sys_get_temp_dir(), "MU");
+	if($fname == "")
+		kill("Error creating archive");
+	unlink($fname);
+	$arch = new ZipArchive();
+	if($arch->open($fname, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true)
+		kill("Error creating archive");
 	foreach($songs as $fpath)
 	{
-		if(!is_readable($fpath))
-			kill("File not found or not readable");
-		//$zip->addFile($fpath);
+		if(!is_readable($fpath) || $arch->addFile($fpath, "/".substr($fpath, strrpos($fpath, "/")+1)) !== true)
+		{
+			$arch->close();
+			unlink($fname);
+			kill("Error with file: $fpath");
+		}
 	}
-	//$zip->
+	$arch->close();
+	if(!file_exists($fname))
+		kill("Error creating archive");
+	header("Content-Type: ".mime_content_type($fname));
+	header("Content-Length: ".filesize($fname));
+	readfile($fname);
+	unlink($fname);
 ?>

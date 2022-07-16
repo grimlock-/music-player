@@ -65,6 +65,7 @@
 				<button type="button" class="close"></button>
 				<h3 class="collection_title">Collection title here</h3>
 				<h5 class="album_aliases hidden">Alternate titles</h5>
+				<button type="button" class="download"></button>
 				<img src="img/album.png">
 				<div class="album_aliases"></div>
 				<div id="collection_items"></div>

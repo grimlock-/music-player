@@ -160,6 +160,8 @@ function GetCollectionRoot(ele)
 	{
 		if(ret.classList.contains("collection"))
 			return ret;
+		if(ret.id == "collection_spotlight")
+			return ret;
 		ret = ret.parentElement;
 	}
 	return null;
@@ -209,11 +211,11 @@ function _albumArtError(error)
 }
 function _addSong()
 {
-	if(Config.Get("queue.always_append") === true || Queue.IndexOf(this.dataset.id) == -1)
-		Queue.AddSong(this.dataset.id);
+	if(Config.Get("queue.always_append") === true || Queue.IndexOf(this.dataset.songid) == -1)
+		Queue.AddSong(this.dataset.songid);
 }
 let spotlight_element = null;
-function _showCollection()
+function _showCollection(e)
 {
 	if(spotlight_element === this)
 		return;
@@ -251,7 +253,7 @@ function _showCollection()
 			continue;
 		let text = "";
 		let ele = document.createElement("div");
-		ele.dataset.id = id;
+		ele.dataset.songid = id;
 		if(data.track_number)
 			text += data.track_number + " - ";
 		text += data.title + " - " + Util.StoMS(data.duration);
@@ -280,7 +282,7 @@ function _showCollection()
 		//TODO - set class on spotlight making stuff right aligned
 	}
 }
-function HideCollection()
+function _hideCollection(e)
 {
 	document.getElementById("collection_spotlight").classList.add("hidden");
 	spotlight_element = null;
@@ -298,7 +300,37 @@ function UpdateSpotlightPosition()
 		top = visualViewport.height - spot_rect.height;
 	$("#collection_spotlight").style.top = top + "px";
 }
-document.getElementById("collection_spotlight").querySelector(".close").addEventListener("click", HideCollection);
+function _downloadCollection(e)
+{
+	let ids = [];
+	let root = GetCollectionRoot(this);
+	for(let ele of $$(root, "*[data-songid]"))
+	{
+		ids.push(ele.dataset.songid);
+	}
+
+	let title = $(root, "*[data-title]");
+	if(title)
+	{
+		title = title.dataset.title;
+	}
+	else
+	{
+		title = $(root, ".collection_title");
+		if(title)
+			title = title.innerHTML;
+		else
+			title = "Untitled Collection";
+	}
+
+	let ele = make("a");
+	ele.href = API + "download.php?type=song&id=" + encodeURIComponent(ids.join(','));
+	ele.setAttribute("download", title + ".zip");
+	ele.click();
+	return false;
+}
+document.getElementById("collection_spotlight").querySelector(".close").addEventListener("click", _hideCollection);
+document.getElementById("collection_spotlight").querySelector(".download").addEventListener("click", _downloadCollection);
 document.getElementById("main_panel").addEventListener("scroll", UpdateSpotlightPosition);
 
 
@@ -454,7 +486,7 @@ let Timeline = {
 					let item = artists[artist][0];
 					let newNode = document.createElement("div");
 					newNode.innerHTML = item.title + " | " + item.artists + " | " + item.genre + " | " + Util.StoMS(item.duration);
-					newNode.dataset.id = item.id;
+					newNode.dataset.songid = item.id;
 					newNode.addEventListener("click", _addSong);
 					innerWrapper.appendChild(newNode);
 				}
@@ -814,7 +846,7 @@ let Artist = {
 			for(let s of this.songs)
 			{
 				let ele = make("div", s.title);
-				ele.dataset.id = s.id;
+				ele.dataset.songid = s.id;
 				ele.addEventListener("click", _addSong);
 				$("#artist_songs").appendChild(ele);
 			}
@@ -1049,7 +1081,7 @@ let Random = {
 			if(song.artists)
 				newNode.innerHTML += " | " + song.artists;
 			newNode.innerHTML += " | " + Util.StoMS(song.duration);
-			newNode.dataset.id = song.id;
+			newNode.dataset.songid = song.id;
 			newNode.dataset.type = "song";
 			newNode.addEventListener("click", _addSong);
 			container.appendChild(newNode);
