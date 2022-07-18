@@ -49,14 +49,14 @@
 		<div id="quicksearch_results" class="hidden"></div>
 		<div id="queue"><div id="songs"></div><div id="queue_info"></div></div>
 		<div id="controls">
-			<div id="previous">Previous</div>
-			<div id="playpause">Play</div>
-			<div id="stop">Stop</div>
-			<div id="next">Next</div>
-			<div id="loop">Loop: off</div>
+			<button id="previous" class="player-button previous"></button>
+			<button id="playpause" class="player-button play"></button>
+			<button id="stop" class="player-button stop"></button>
+			<button id="next" class="player-button next"></button>
+			<button id="loop" class="player-button loop-off"></button>
 			<div id="volume">Vol <input type="range" id="volume_slider" min="0" max="1" value="1" step="any" /></div>
 			<div id="seekbar_stuff"><span id="tracktime">--:--</span> <input type="range" id="seekbar" min="0" max="10" value="0" step="1" /><span id="tracklen">--:--</span></div>
-			<div id="clear">clear queue</div>
+			<button id="clear">clear queue</button>
 		</div>
 		<div id="divider"></div>
 		<div id="art" class="hidden"></div>

@@ -110,3 +110,12 @@
  ^Queue^
 ********/
 
+.player-button {
+	width: 24px;
+	height: 24px;
+	border: none;
+	background-color: transparent;
+}
+.player-button:hover {
+	background-color: rgba(0, 0, 0, 0.2);
+}

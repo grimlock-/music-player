@@ -29,7 +29,8 @@ function SetState(state)
 	{
 		case PlayerState.Idle:
 			State = state;
-			document.getElementById("playpause").innerHTML = "play";
+			document.getElementById("playpause").classList.remove("pause", "loading");
+			document.getElementById("playpause").classList.add("play");
 
 			/*if(navigator.mediaSession)
 			{
@@ -43,7 +44,8 @@ function SetState(state)
 
 		case PlayerState.Loading:
 			State = state;
-			document.getElementById("playpause").innerHTML = "loading...";
+			document.getElementById("playpause").classList.remove("play", "pause");
+			document.getElementById("playpause").classList.add("loading");
 
 			/*if(navigator.mediaSession)
 			{
@@ -57,7 +59,8 @@ function SetState(state)
 
 		case PlayerState.Paused:
 			State = state;
-			document.getElementById("playpause").innerHTML = "play";
+			document.getElementById("playpause").classList.remove("pause", "loading");
+			document.getElementById("playpause").classList.remove("play");
 
 			/*if(navigator.mediaSession)
 			{
@@ -71,7 +74,8 @@ function SetState(state)
 
 		case PlayerState.Playing:
 			State = state;
-			document.getElementById("playpause").innerHTML = "pause";
+			document.getElementById("playpause").classList.remove("play", "loading");
+			document.getElementById("playpause").classList.add("pause");
 			if(!Monitor)
 				Monitor = setInterval(Heartbeat, 800);
 
@@ -87,7 +91,8 @@ function SetState(state)
 
 		case PlayerState.Stopping:
 			State = state;
-			document.getElementById("playpause").innerHTML = "play";
+			document.getElementById("playpause").classList.remove("pause", "loading");
+			document.getElementById("playpause").classList.remove("play");
 			if(Monitor)
 			{
 				clearInterval(Monitor);
@@ -520,7 +525,7 @@ export function Pause()
 	let len = newNode.buffer.duration * 1000;
 	let songTime = Date.now() - PlaybackStart;
 	PlaybackStart = songTime % len;
-	document.getElementById("playpause").innerHTML = "play";
+	//document.getElementById("playpause").innerHTML = "play";
 	if(navigator.mediaSession)
 	{
 		navigator.mediaSession.setActionHandler("pause", null);
@@ -555,6 +560,8 @@ export function LoopTrack()
 	Looping = "track";
 	if(CurrentNode)
 		CurrentNode.loop = true;
+	$("#loop").classList.remove("loop-all", "loop-off");
+	$("#loop").classList.add("loop-single");
 }
 
 export function LoopQueue()
@@ -562,6 +569,8 @@ export function LoopQueue()
 	Looping = "queue";
 	if(CurrentNode && CurrentNode.loop)
 		CurrentNode.loop = false;
+	$("#loop").classList.remove("loop-off", "loop-single");
+	$("#loop").classList.add("loop-all");
 }
 
 export function LoopOff()
@@ -569,4 +578,6 @@ export function LoopOff()
 	Looping = "";
 	if(CurrentNode && CurrentNode.loop)
 		CurrentNode.loop = false;
+	$("#loop").classList.remove("loop-all", "loop-single");
+	$("#loop").classList.add("loop-off");
 }

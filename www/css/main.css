@@ -31,7 +31,7 @@ body {
 }
 
 .close {
-	background-image: url("../img/close.svg");
+	background-image: url("../img/x.svg");
 	background-color: transparent;
 	width: 25px;
 	height: 25px;
@@ -47,6 +47,9 @@ body {
 	height: 25px;
 	cursor: pointer;
 	border: none;
+}
+.download:hover {
+	background-color: rgba(0, 0, 0, 0.2);
 }
 
 .tile_sm {
@@ -137,10 +140,44 @@ body {
 	margin-top: 5px;
 	margin-right: 5px;
 }
+#collection_spotlight .close:hover {
+	background-color: rgba(0, 0, 0, 0.2);
+}
 #collection_spotlight img {
 	width: 200px;
 	height: 200px;
 }
 #collection_items {
 	overflow: auto;
+}
+
+.player-button.play {
+	background-image: url("../img/player-play.svg");
+}
+.player-button.pause {
+	background-image: url("../img/player-pause.svg");
+}
+.player-button.stop {
+	background-image: url("../img/player-stop.svg");
+}
+.player-button.loading {
+	background-image: url("../img/rotate-clockwise-2.svg");
+}
+.player-button.previous {
+	background-image: url("../img/player-track-prev.svg");
+}
+.player-button.next {
+	background-image: url("../img/player-track-next.svg");
+}
+.player-button.loop-off {
+	background-image: url("../img/repeat.svg");
+}
+.player-button.loop-single {
+	background-image: url("../img/repeat-once.svg");
+}
+.player-button.volume {
+	background-image: url("../img/volume.svg");
+}
+.player-button.volume.muted {
+	background-image: url("../img/volume-off.svg");
 }

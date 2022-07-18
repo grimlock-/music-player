@@ -329,17 +329,14 @@ document.getElementById("loop").addEventListener("click", function(e){
 	{
 		case "":
 			Player.LoopTrack();
-			this.innerHTML = "Loop: track";
 		break;
 
 		case "track":
 			Player.LoopQueue();
-			this.innerHTML = "Loop: queue";
 		break;
 
 		case "queue":
 			Player.LoopOff();
-			this.innerHTML = "Loop: off";
 		break;
 
 		default:

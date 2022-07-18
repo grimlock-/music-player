@@ -781,10 +781,7 @@ let Artist = {
 			}
 			this.songs = data;
 			for(let s of data)
-			{
-				if(!Cache.GetSongInfo(s.id))
-					Cache.SetSongInfo(s.id, s);
-			}
+				Cache.SetSongInfo(s.id, s);
 		}).bind(this))
 		.catch(err => Util.DisplayError("Error initializing Artists view: " + err.message));
 		await fetch(API + "artist_info.php?id=" + artist_id)
@@ -812,6 +809,7 @@ let Artist = {
 		else
 			Instance.querySelector("#aliases").classList.add("hidden");
 
+		if(this.info.countries && this.info.locations)
 		$(Instance, "#info").innerHTML = "Countries: " + (Util.EscHtml(this.info.countries) || "N/A") +
 							" | Locations: " + (Util.EscHtml(this.info.locations) || "N/A");
 
