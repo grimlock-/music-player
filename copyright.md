@@ -1,6 +1,6 @@
 Copyright
 =============
-###Tabler Icons
+### Tabler Icons
 Copyright (c) 2020-2022 Paweł Kuna
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR

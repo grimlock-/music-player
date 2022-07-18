@@ -236,5 +236,39 @@ export function EscHtml(str)
 }
 export function RenderMarkdown(string, container)
 {
-	container.innerHTML = string;
+	let ele = make("p", "");
+	for(let line of string.split('\n'))
+	{
+		if(line.length == 0)
+		{
+			ele.innerHTML += "<br/>";
+		}
+		else if(line.indexOf('[') == -1)
+		{
+			ele.innerHTML += EscHtml(line);
+		}
+		else
+		{
+			let start = 0;
+			let i = line.indexOf('[');
+			do
+			{
+				let ii = line.indexOf(']', i+1);
+				let paren1 = line.indexOf('(', ii);
+				let paren2 = line.indexOf(')', ii);
+				let a = make("a");
+				if(i-start > 0)
+					ele.innerHTML += EscHtml(line.substring(start,i));
+				a.innerHTML = EscHtml(line.substring(i+1, ii));
+				a.href = line.substring(paren1+1, paren2);
+				ele.appendChild(a);
+
+				start = paren2+1;
+				i = line.indexOf('[', start);
+			} while(i != -1);
+			if(start <= line.length)
+				ele.innerHTML += line.substring(start);
+		}
+	}
+	container.appendChild(ele);
 }
