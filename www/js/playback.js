@@ -1,3 +1,9 @@
+/**
+ * Logic for
+ *     playing tracks
+ *     tracking position/index in queue
+ *     buffering next track
+ */
 import * as Cache from './cache.js';
 import * as Queue from './queue.js';
 import * as Config from './config.js';
@@ -60,7 +66,7 @@ function SetState(state)
 		case PlayerState.Paused:
 			State = state;
 			document.getElementById("playpause").classList.remove("pause", "loading");
-			document.getElementById("playpause").classList.remove("play");
+			document.getElementById("playpause").classList.add("play");
 
 			/*if(navigator.mediaSession)
 			{
@@ -124,13 +130,18 @@ let LoadingXhr = null;
 let Monitor = 0;
 //During playback, holds Date.now() when started. When paused, holds delta between that and pause time
 let PlaybackStart = -1;
+let ActiveQueueIndex = 0;
+export function SetActiveIndex(i)
+{
+	ActiveQueueIndex = i;
+}
 
 export function PlayFromIdle()
 {
-	if(Queue.Count() == 0)
+	let id = Queue.Get(ActiveQueueIndex);
+	if(id === null)
 		return;
-	let id = Queue.GetActiveId();
-	if(id && IsLoaded(id))
+	if(IsLoaded(id))
 		BeginPlayback();
 	else
 		Load(id, true);
@@ -147,7 +158,7 @@ else
 
 export function BeginPlayback()
 {
-	let id = Queue.GetActiveId();
+	let id = Queue.Get(ActiveQueueIndex);
 	if(!id || !IsLoaded(id))
 	{
 		console.error("Cannot play, \"" + id + "\" has not been loaded");
@@ -235,32 +246,19 @@ function _playbackEnded(e)
 	if(State == PlayerState.Paused)
 		return;
 
+	console.log("Playback finished");
 	this.disconnect();
 	if(CurrentNode === this)
 		CurrentNode = null;
 
-	if(Config.Get("cache.decache_after_playback") || Config.Get("queue.remove_after_playback"))
+	if(ShouldUnload(CurrentSong))
 	{
-		//FIXME - when the first and last song are the same, it's still unloading and reloading
-		let looping = (Looping == "queue");
-		if(Queue.NextSong(looping) !== CurrentSong)
-		{
-			Unload(CurrentSong);
-		}
-		else
-		{
-			//FIXME - code here executes when stopping playback with only a single track in the queue
-			//might be linked to above comment
-			let newNode = Context.createBufferSource();
-			newNode.buffer = PlayCache[CurrentSong].buffer;
-			newNode.onended = _playbackEnded;
-			PlayCache[CurrentSong].node = newNode;
-		}
-		if(Config.Get("queue.remove_after_playback"))
-			Queue.Pop();
+		console.log("Unloading");
+		Unload(CurrentSong);
 	}
 	else
 	{
+		console.log("NOT Unloading");
 		let newNode = Context.createBufferSource();
 		newNode.buffer = PlayCache[CurrentSong].buffer;
 		newNode.onended = _playbackEnded;
@@ -269,42 +267,66 @@ function _playbackEnded(e)
 
 	if(State == PlayerState.Stopping)
 	{
-		for(let id of Object.keys(PlayCache))
+		if(Config.Get("cache.unload_all_songs_on_stop"))
 		{
-			Unload(id);
+			for(let id of Object.keys(PlayCache))
+				Unload(id);
 		}
 		PlaybackStart = -1;
 		SetCurrentSong("");
 		SetState(PlayerState.Idle);
 	}
-	else if(Queue.Count() > 0)
+	else if(Queue.Count() == 0)
 	{
-		let ai = Queue.GetActiveIndex();
-		let next = Queue.Get(ai+1);
-		if(next === null)
+		if(Config.Get("queue.remove_after_playback"))
 		{
-			next = Queue.Get(0);
-			if(Looping != "queue" || next === null)
-			{
-				Stop();
-				return;
-			}
-			ai = -1;
+			Queue.Remove(ActiveQueueIndex);
+			if(Queue.IndexOf(CurrentSong) == -1 && Cache.GetSongInfo(CurrentSong) !== null)
+				Unload(CurrentSong);
 		}
 
-		Queue.SetActiveIndex(ai+1);
-		if(IsLoaded(next))
-			BeginPlayback();
-		else
-			Load(next, true);
-
+		PlaybackStart = -1;
+		SetCurrentSong("");
+		Stop();
 	}
 	else
 	{
-		PlaybackStart = -1;
-		Stop();
-		SetCurrentSong("");
+		if(Config.Get("queue.remove_after_playback"))
+		{
+			Queue.Remove(ActiveQueueIndex);
+			if(Queue.IndexOf(CurrentSong) == -1 && Cache.GetSongInfo(CurrentSong) !== null)
+				Unload(CurrentSong);
+		}
+
+		let next = Queue.NextSong(ActiveQueueIndex, Looping == "queue");
+		if(next === null)
+		{
+			Stop();
+		}
+		else
+		{
+			ActiveQueueIndex = (ActiveQueueIndex+1) % Queue.Count();
+			if(IsLoaded(next))
+				BeginPlayback();
+			else
+				Load(next, true);
+		}
+
 	}
+}
+function ShouldUnload(CurrentSong)
+{
+	if(!Config.Get("cache.unload_all_songs_on_stop") && State == PlayerState.Stopping)
+		return false;
+
+	let looping = (Looping == "queue");
+	if(Queue.NextSong(ActiveQueueIndex, looping) === CurrentSong)
+		return false;
+
+	if(!Config.Get("cache.decache_after_playback") && !Config.Get("queue.remove_after_playback"))
+		return false;
+
+	return true;
 }
 //Update seek bar each tick, preload next tracks, schedule next track playback when current one is near the end
 function Heartbeat()
@@ -362,13 +384,12 @@ function NextSongToLoad()
 		return null;
 
 
-	let ai = Queue.GetActiveIndex();
 	let precachedCount = 0;
 	let set;
 	if(Looping != "queue")
-		set = Queue.GetRange(ai);
+		set = Queue.GetRange(ActiveQueueIndex);
 	else
-		set = Queue.GetAllShifted(ai);
+		set = Queue.GetAllShifted(ActiveQueueIndex);
 
 	for(let i = 1; i < set.length; ++i)
 	{

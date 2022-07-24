@@ -30,12 +30,14 @@ const defaultSettings =
 		precache_min_len: 71,
 		//Remove songs from cache after playback
 		decache_after_playback: true,
-		unload_all_songs_on_stop: false
+		unload_all_songs_on_stop: true
 	},
 	views: {
 		timeline: {
 			default_grouping: "month",
-			next_chunk_scroll_percent: 80
+			next_chunk_scroll_percent: 80,
+			//When true, songs with no import date show up at the end of the timeline
+			show_songs_with_no_date: false
 		},
 		artists: {
 			//When getting all items for a letter, include items that have punctuation before the given character
@@ -166,6 +168,7 @@ function IsValid(tsets)
 	{
 		
 	}
+	return true;
 }
 
 export function Save()

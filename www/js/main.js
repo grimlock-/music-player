@@ -153,7 +153,7 @@ function _queueClick(e)
 				console.log("TODO - The player should be able to start a song while already playing one without issue");
 				return;
 			}
-			Queue.SetActiveIndex(i);
+			Player.SetActiveIndex(i);
 			Player.BeginPlayback();
 		}
 		else
@@ -316,6 +316,7 @@ document.getElementById("seekbar").addEventListener("input", function(e){
 	console.log("seek to " + this.value);
 });
 document.getElementById("clear").addEventListener("click", function(e){
+	Player.SetActiveIndex(0);
 	Queue.Clear();
 });
 document.getElementById("next").addEventListener("click", function(e){
@@ -343,6 +344,9 @@ document.getElementById("loop").addEventListener("click", function(e){
 			console.log("Unknown looping state: " + Player.Looping);
 		break;
 	}
+});
+document.getElementById("shuffle").addEventListener("click", function(e){
+	Queue.Shuffle();
 });
 document.getElementById("divider").addEventListener("mousedown", function(e) {
 	console.log("divider mousedown");

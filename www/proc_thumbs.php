@@ -261,7 +261,7 @@ foreach($mediadirs as $dir)
 		continue;
 	$scan = initialscan($dir);
 	$albumdirs = array_merge($albumdirs, $scan["albums"]);
-	$artistdirs = array_merge($albumdirs, $scan["artist"]);
+	$artistdirs = array_merge($albumdirs, $scan["artists"]);
 }
 
 //Handle artists

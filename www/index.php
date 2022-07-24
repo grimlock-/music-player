@@ -54,6 +54,7 @@
 			<button id="stop" class="player-button stop"></button>
 			<button id="next" class="player-button next"></button>
 			<button id="loop" class="player-button loop-off"></button>
+			<button id="shuffle" class="player-button shuffle"></button>
 			<div id="volume">Vol <input type="range" id="volume_slider" min="0" max="1" value="1" step="any" /></div>
 			<div id="seekbar_stuff"><span id="tracktime">--:--</span> <input type="range" id="seekbar" min="0" max="10" value="0" step="1" /><span id="tracklen">--:--</span></div>
 			<button id="clear">clear queue</button>

@@ -1,7 +1,8 @@
-/*
- * Invariants:
- *   Through List modifier functions, ActiveIndex is always valid unless the list is empty
- *     -this puts onus on calling code to check queue length
+/**
+ * FIXME - After moving the active index from here to playback.js, 
+ * removing entries from the list will not update the active index
+ * accordingly. The best remedy seems to be adding an event for
+ * queue modifications, but I want to think on this some more
  */
 import * as Config from './config.js';
 import * as Cache from './cache.js';
@@ -10,7 +11,6 @@ import * as Util from './util.js';
 let List = [];
 let songs_element = document.getElementById("songs");
 let queue_info_element = document.getElementById("queue_info");
-let ActiveIndex = 0;
 
 export async function LoadFromStorage()
 {
@@ -29,7 +29,7 @@ function Save()
 	localStorage.setItem("queue", JSON.stringify(List));
 }
 
-export function GetActiveId()
+/*export function GetActiveId()
 {
 	return List[ActiveIndex];
 }
@@ -43,18 +43,18 @@ export function SetActiveIndex(i)
 {
 	if(i >= 0 && i <= List.length-1)
 		ActiveIndex = i;
-}
+}*/
 
-export function NextSong(loopAround = false)
+export function NextSong(i, loopAround = false)
 {
-	if(ActiveIndex >= List.length-1)
+	if(i >= List.length-1)
 	{
 		if(List.length == 0 || !loopAround)
 			return "";
 		else
 			return List[0];
 	}
-	return List[ActiveIndex+1];
+	return List[i+1];
 }
 
 export function AddSong(songId)
@@ -142,21 +142,22 @@ export function Shuffle()
 		List[r] = List[i];
 		List[i] = temp;
 	}
+	Save();
 	redoHtml();
 }
 
 export function Clear()
 {
-	ActiveIndex = 0;
 	List = [];
 	songs_element.innerHTML = "";
 	updateQueueInfo();
 	Save();
 }
 
-export function Remove(index)
+export function Remove(i)
 {
-	
+	List = List.splict(i, 1);
+	Save();
 }
 
 export function GetTotalDuration()

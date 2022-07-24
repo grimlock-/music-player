@@ -65,12 +65,14 @@ body {
 	height: 30px;
 	position: absolute;
 	transform: translateX(66px) translateY(3px);
+	background-color: white;
 }
 .tile_sm .albumImageLink {
 	width: 20px;
 	height: 20px;
 	position: absolute;
 	transform: translateX(75px) translateY(75px);
+	background-color: white;
 }
 .tile_sm .albumImageLink img {
 	width: 20px;
@@ -90,12 +92,17 @@ body {
 	height: 40px;
 	position: absolute;
 	transform: translateX(156px) translateY(5px);
+	background-color: white;
 }
+/*.tile_med .add:hover {
+	background-color: rgba(0,0,0,0.2);
+}*/
 .tile_med .albumImageLink {
 	width: 25px;
 	height: 25px;
 	position: absolute;
 	transform: translateX(170px) translateY(170px);
+	background-color: white;
 }
 .tile_med .albumImageLink img {
 	width: 25px;
@@ -115,12 +122,14 @@ body {
 	height: 40px;
 	position: absolute;
 	transform: translateX(356px) translateY(5px);
+	background-color: white;
 }
 .tile_lg .albumImageLink {
 	width: 40px;
 	height: 40px;
 	position: absolute;
 	transform: translateX(385px) translateY(385px);
+	background-color: white;
 }
 .tile_lg .albumImageLink img {
 	width: 40px;
@@ -180,4 +189,7 @@ body {
 }
 .player-button.volume.muted {
 	background-image: url("../img/volume-off.svg");
+}
+.player-button.shuffle {
+	background-image: url("../img/arrows-shuffle.svg");
 }
