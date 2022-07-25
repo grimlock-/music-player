@@ -328,20 +328,16 @@ document.getElementById("stop").addEventListener("click", function(e){
 document.getElementById("loop").addEventListener("click", function(e){
 	switch(Player.Looping)
 	{
-		case "":
+		case Player.Loop.Off:
 			Player.LoopTrack();
 		break;
 
-		case "track":
+		case Player.Loop.Track:
 			Player.LoopQueue();
 		break;
 
-		case "queue":
+		case Player.Loop.Queue:
 			Player.LoopOff();
-		break;
-
-		default:
-			console.log("Unknown looping state: " + Player.Looping);
 		break;
 	}
 });

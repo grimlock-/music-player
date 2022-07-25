@@ -12,6 +12,7 @@ import * as Util from './util.js';
 const API = location.href + "api/";
 
 let Context = new AudioContext({latencyHint: "playback"});
+let AudioEle = new Audio();
 let MasterGain = Context.createGain();
 //Gain nodes are apparently always created at full volume
 SetGain(document.getElementById("volume_slider").value);
@@ -122,7 +123,12 @@ function SetState(state)
 }
 SetState(PlayerState.Idle);
 
-export let Looping = ""; //"", "track", "queue"
+export const Loop = {
+	"Off": 0,
+	"Track": 1,
+	"Queue": 2
+}
+export let Looping = Loop.Off; //"", "track", "queue"
 let CurrentSong = "";
 let CurrentNode = null;
 let CurrentlyLoading = null;
@@ -168,7 +174,7 @@ export function BeginPlayback()
 	CurrentNode = PlayCache[id].node;
 	PlayCache[id].node = null;
 	CurrentNode.connect(MasterGain);
-	if(Looping == "track")
+	if(Looping == Loop.Track)
 		CurrentNode.loop = true;
 	CurrentNode.start();
 
@@ -298,7 +304,7 @@ function _playbackEnded(e)
 				Unload(CurrentSong);
 		}
 
-		let next = Queue.NextSong(ActiveQueueIndex, Looping == "queue");
+		let next = Queue.NextSong(ActiveQueueIndex, Looping == Loop.Queue);
 		if(next === null)
 		{
 			Stop();
@@ -319,7 +325,7 @@ function ShouldUnload(CurrentSong)
 	if(!Config.Get("cache.unload_all_songs_on_stop") && State == PlayerState.Stopping)
 		return false;
 
-	let looping = (Looping == "queue");
+	let looping = (Looping == Loop.Queue);
 	if(Queue.NextSong(ActiveQueueIndex, looping) === CurrentSong)
 		return false;
 
@@ -386,7 +392,7 @@ function NextSongToLoad()
 
 	let precachedCount = 0;
 	let set;
-	if(Looping != "queue")
+	if(Looping != Loop.Queue)
 		set = Queue.GetRange(ActiveQueueIndex);
 	else
 		set = Queue.GetAllShifted(ActiveQueueIndex);
@@ -526,7 +532,7 @@ export function Resume()
 	CurrentNode = PlayCache[CurrentSong].node;
 	PlayCache[CurrentSong].node = null;
 	CurrentNode.connect(MasterGain);
-	if(Looping == "track")
+	if(Looping == Loop.Track)
 		CurrentNode.loop = true;
 	CurrentNode.start(Context.currentTime, PlaybackStart/1000);
 
@@ -578,7 +584,7 @@ export function NextSong()
 
 export function LoopTrack()
 {
-	Looping = "track";
+	Looping = Loop.Track;
 	if(CurrentNode)
 		CurrentNode.loop = true;
 	$("#loop").classList.remove("loop-all", "loop-off");
@@ -587,7 +593,7 @@ export function LoopTrack()
 
 export function LoopQueue()
 {
-	Looping = "queue";
+	Looping = Loop.Queue;
 	if(CurrentNode && CurrentNode.loop)
 		CurrentNode.loop = false;
 	$("#loop").classList.remove("loop-off", "loop-single");
@@ -596,7 +602,7 @@ export function LoopQueue()
 
 export function LoopOff()
 {
-	Looping = "";
+	Looping = Loop.Off;
 	if(CurrentNode && CurrentNode.loop)
 		CurrentNode.loop = false;
 	$("#loop").classList.remove("loop-all", "loop-single");
