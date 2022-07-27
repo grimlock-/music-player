@@ -12,7 +12,25 @@ import * as Util from './util.js';
 const API = location.href + "api/";
 
 let Context = new AudioContext({latencyHint: "playback"});
-let AudioEle = new Audio();
+let Element = new Audio();
+Element.autoplay = true;
+Element.addEventListener("ended", _elementPlaybackEnded);
+Element.addEventListener("canplay", function(e){
+	let id = this.src.substring(this.src.indexOf('=')+1);
+	if(!IsLoaded(id))
+	{
+		this.play();
+		SetCurrentSong(id);
+		PlaybackStart = Date.now();
+		SetState(PlayerState.Playing);
+	}
+	else
+	{
+		this.src = "";
+		load();
+	}
+});
+let SwitchingAudio = false;
 let MasterGain = Context.createGain();
 //Gain nodes are apparently always created at full volume
 SetGain(document.getElementById("volume_slider").value);
@@ -23,7 +41,8 @@ export const PlayerState = {
 	"Loading": 1,
 	"Paused": 2,
 	"Playing": 3,
-	"Stopping": 4
+	"Stopping": 4,
+	"Switching": 5
 }
 let State;
 export function GetState()
@@ -128,7 +147,7 @@ export const Loop = {
 	"Track": 1,
 	"Queue": 2
 }
-export let Looping = Loop.Off; //"", "track", "queue"
+export let Looping = Loop.Off;
 let CurrentSong = "";
 let CurrentNode = null;
 let CurrentlyLoading = null;
@@ -147,10 +166,7 @@ export function PlayFromIdle()
 	let id = Queue.Get(ActiveQueueIndex);
 	if(id === null)
 		return;
-	if(IsLoaded(id))
-		BeginPlayback();
-	else
-		Load(id, true);
+	BeginPlayback(id);
 }
 /*if(navigator.mediaSession)
 {
@@ -162,25 +178,34 @@ else
 	console.log("No Media Session");
 }*/
 
-export function BeginPlayback()
+export function BeginPlayback(id)
 {
-	let id = Queue.Get(ActiveQueueIndex);
-	if(!id || !IsLoaded(id))
+	//let id = Queue.Get(ActiveQueueIndex);
+	if(!id)
 	{
-		console.error("Cannot play, \"" + id + "\" has not been loaded");
+		console.error("Empty song id");
 		return;
 	}
 
-	CurrentNode = PlayCache[id].node;
-	PlayCache[id].node = null;
-	CurrentNode.connect(MasterGain);
-	if(Looping == Loop.Track)
-		CurrentNode.loop = true;
-	CurrentNode.start();
+	if(IsLoaded(id))
+	{
+		CurrentNode = PlayCache[id].node;
+		PlayCache[id].node = null;
+		CurrentNode.connect(MasterGain);
+		if(Looping == Loop.Track)
+			CurrentNode.loop = true;
+		CurrentNode.start();
 
-	SetCurrentSong(id);
-	PlaybackStart = Date.now();
-	SetState(PlayerState.Playing);
+		SetCurrentSong(id);
+		PlaybackStart = Date.now();
+		SetState(PlayerState.Playing);
+	}
+	else
+	{
+		Element.src = API + "song.php?id=" + encodeURIComponent(id);
+		Load(id);
+		SetState(PlayerState.Loading);
+	}
 
 	//Media Session
 	//Media session stuff will not work because browsers only give audio focus
@@ -247,27 +272,61 @@ export function BeginPlayback()
 		});
 	}*/
 }
-function _playbackEnded(e)
+function SwitchPlayback(id)
+{
+	if(!IsLoaded(id))
+	{
+		console.error("SwitchPlayback(): Song not loaded");
+		return;
+	}
+
+	console.group("SwitchPlayback()");
+	console.log("Current time: " + Element.currentTime);
+	console.log("Start time: " + PlaybackStart);
+	SwitchingAudio = true;
+
+	//in seconds
+	let time = Element.currentTime;
+
+	//Stop audio element
+	Element.pause();
+	Element.src = "";
+	Element.load();
+
+	//Play via buffer node
+	CurrentNode = PlayCache[id].node;
+	PlayCache[id].node = null;
+	CurrentNode.connect(MasterGain);
+	if(Looping == Loop.Track)
+		CurrentNode.loop = true;
+
+	CurrentNode.start(Context.currentTime, time);
+
+	SetCurrentSong(id);
+	SetState(PlayerState.Playing);
+	
+	SwitchingAudio = false;
+	console.groupEnd();
+}
+function _nodePlaybackEnded(e)
 {
 	if(State == PlayerState.Paused)
 		return;
 
-	console.log("Playback finished");
+	console.log("Playback finished (audio node)");
 	this.disconnect();
 	if(CurrentNode === this)
 		CurrentNode = null;
 
 	if(ShouldUnload(CurrentSong))
 	{
-		console.log("Unloading");
 		Unload(CurrentSong);
 	}
 	else
 	{
-		console.log("NOT Unloading");
 		let newNode = Context.createBufferSource();
 		newNode.buffer = PlayCache[CurrentSong].buffer;
-		newNode.onended = _playbackEnded;
+		newNode.onended = _nodePlaybackEnded;
 		PlayCache[CurrentSong].node = newNode;
 	}
 
@@ -312,13 +371,26 @@ function _playbackEnded(e)
 		else
 		{
 			ActiveQueueIndex = (ActiveQueueIndex+1) % Queue.Count();
-			if(IsLoaded(next))
-				BeginPlayback();
-			else
-				Load(next, true);
+			BeginPlayback(next);
 		}
 
 	}
+}
+function _elementPlaybackEnded(e)
+{
+	console.log("Playback finished (audio element)");
+	if(SwitchingAudio)
+		return;
+	if(CurrentlyLoading == CurrentSong && LoadingXhr !== null)
+	{
+		LoadingXhr.abort();
+		LoadingXhr = null;
+	}
+	let id = Queue.Get(++ActiveQueueIndex);
+	if(id)
+		BeginPlayback(id);
+	else
+		Stop();
 }
 function ShouldUnload(CurrentSong)
 {
@@ -415,13 +487,10 @@ function NextSongToLoad()
 	return null;
 }
 
-export function Load(id, playAfterLoading = false)
+export function Load(id)
 {
 	if(IsLoaded(id) || CurrentlyLoading !== null)
 		return;
-
-	if(playAfterLoading)
-		SetState(PlayerState.Loading);
 
 	CurrentlyLoading = id;
 
@@ -449,13 +518,30 @@ export function Load(id, playAfterLoading = false)
 			CurrentlyLoading = null;
 			let sourceNode = Context.createBufferSource();
 			sourceNode.buffer = buffer;
-			sourceNode.onended = _playbackEnded;
+			sourceNode.onended = _nodePlaybackEnded;
 			PlayCache[id] = {"buffer": buffer, "node": sourceNode};
 			document.querySelectorAll("#queue *[data-songid=\"" + id + "\"] .progress").forEach(ele => ele.classList.add("complete"));
-			if(playAfterLoading)
+
+			switch(State)
 			{
-				if(State != PlayerState.Playing)
-					BeginPlayback();
+				case PlayerState.Playing:
+					SwitchPlayback(id);
+				break;
+
+				case PlayerState.Paused:
+					this.src = "";
+					load();
+					//Resume() should be able to pick up from here
+				break;
+
+				case PlayerState.Loading:
+					BeginPlayback(id);
+				break;
+
+				default:
+					//idle
+					//stopping
+				break;
 			}
 		})
 		.catch(requestFail);
@@ -547,7 +633,7 @@ export function Pause()
 	CurrentNode.stop();
 	let newNode = Context.createBufferSource();
 	newNode.buffer = PlayCache[CurrentSong].buffer;
-	newNode.onended = _playbackEnded;
+	newNode.onended = _nodePlaybackEnded;
 	PlayCache[CurrentSong].node = newNode;
 	let len = newNode.buffer.duration * 1000;
 	let songTime = Date.now() - PlaybackStart;
@@ -564,16 +650,30 @@ export function Stop()
 {
 	SetState(PlayerState.Stopping);
 	if(LoadingXhr)
+	{
 		LoadingXhr.abort();
+		LoadingXhr = null;
+	}
 	if(CurrentNode)
+	{
 		CurrentNode.stop();
+	}
+	else if(Element.src != null)
+	{
+		Element.pause();
+		Element.src = "";
+		Element.load();
+	}
 	else
+	{
 		SetState(PlayerState.Idle);
+	}
 }
 
 export function SetGain(value)
 {
 	MasterGain.gain.setValueAtTime(value, Context.currentTime);
+	Element.volume = value;
 }
 
 export function NextSong()

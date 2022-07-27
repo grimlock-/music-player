@@ -171,9 +171,9 @@ export function GetTotalDuration()
 	return d;
 }
 
-export function IndexOf(id)
+export function IndexOf(id, offset = 0)
 {
-	return List.indexOf(id);
+	return List.indexOf(id, offset);
 }
 
 export function Get(index)
