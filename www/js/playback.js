@@ -13,7 +13,6 @@ const API = location.href + "api/";
 
 let Context = new AudioContext({latencyHint: "playback"});
 let MasterGain = Context.createGain();
-//TODO - Uncomment me when https://bugzilla.mozilla.org/show_bug.cgi?id=1410365 is resolved
 await Context.audioWorklet.addModule("js/audio-worklets.js");
 let SwapNode = new AudioWorkletNode(Context, "buffered-swap");
 let Element = new Audio();
@@ -504,7 +503,7 @@ export function Load(id)
 	{
 		if(e.message)
 			console.error("Error loading song: " + e.message);
-		document.querySelectorAll("#queue *[data-songid=\"" + id + "\"] .progress").forEach((ele) => { ele.classList.remove("complete"); ele.style.width=""; });
+		$$("#queue *[data-songid=\"" + id + "\"] .progress").forEach((ele) => { ele.classList.remove("complete"); ele.style.width=""; });
 		LoadingXhr = null;
 		CurrentlyLoading = null;
 		if(navigator.mediaSession)
@@ -526,7 +525,7 @@ export function Load(id)
 			sourceNode.buffer = buffer;
 			sourceNode.onended = _nodePlaybackEnded;
 			PlayCache[id] = {"buffer": buffer, "node": sourceNode};
-			document.querySelectorAll("#queue *[data-songid=\"" + id + "\"] .progress").forEach(ele => ele.classList.add("complete"));
+			$$("#queue *[data-songid=\"" + id + "\"] .progress").forEach(ele => ele.classList.add("complete"));
 
 			switch(State)
 			{
@@ -557,7 +556,7 @@ export function Load(id)
 	xhr.addEventListener("progress", function(e) {
 		let percent = Math.floor((e.loaded / e.total) * 100);
 		//console.log("XHR progress: " + e.loaded + " of " + e.total + " bytes | " + percent + "%");
-		document.querySelectorAll("#queue *[data-songid=\"" + id + "\"] .progress").forEach(ele => ele.style.width = percent + "%");
+		$$("#queue *[data-songid=\"" + id + "\"] .progress").forEach(ele => ele.style.width = percent + "%");
 	});
 	xhr.addEventListener("abort", requestFail);
 	xhr.addEventListener("error", requestFail);
@@ -618,7 +617,7 @@ export function Unload(id)
 		return;
 
 	delete PlayCache[id];
-	document.querySelectorAll("#queue *[data-songid=\"" + id + "\"] .progress").forEach((ele) => { ele.classList.remove("complete"); ele.style.width=""; });
+	$$("#queue *[data-songid=\"" + id + "\"] .progress").forEach((ele) => { ele.classList.remove("complete"); ele.style.width=""; });
 }
 
 export function Resume()

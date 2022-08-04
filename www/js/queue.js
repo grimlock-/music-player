@@ -29,22 +29,6 @@ function Save()
 	localStorage.setItem("queue", JSON.stringify(List));
 }
 
-/*export function GetActiveId()
-{
-	return List[ActiveIndex];
-}
-
-export function GetActiveIndex()
-{
-	return ActiveIndex;
-}
-
-export function SetActiveIndex(i)
-{
-	if(i >= 0 && i <= List.length-1)
-		ActiveIndex = i;
-}*/
-
 export function NextSong(i, loopAround = false)
 {
 	if(i >= List.length-1)

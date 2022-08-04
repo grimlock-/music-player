@@ -82,7 +82,7 @@ window.SetView = function(view, section = "default")
 function RefreshViewIndicator()
 {
 	//Deactivate buttons
-	for(let button of document.querySelectorAll(".active[data-view]"))
+	for(let button of $$(".active[data-view]"))
 	{
 		button.classList.remove("active");
 		button.addEventListener("click", _setview);
@@ -90,7 +90,7 @@ function RefreshViewIndicator()
 	//Activate category button for current view
 	if(CurrentView == Config.Get("default_view"))
 		return;
-	for(let button of document.querySelectorAll("#categories > *[data-view=" + CurrentView + "]"))
+	for(let button of $$("#categories > *[data-view=" + CurrentView + "]"))
 	{
 		button.classList.add("active");
 		button.removeEventListener("click", _setview);
@@ -163,7 +163,7 @@ function _setview(e)
 	//TODO - get previous section for this view
 	SetView(this.dataset.view);
 }
-for(let button of document.querySelectorAll("*[data-view]"))
+for(let button of $$("*[data-view]"))
 {
 	let def = Config.Get("default_view");
 	let v = button.dataset.view;

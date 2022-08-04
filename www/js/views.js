@@ -75,7 +75,7 @@ function LoadTemplate(template, section = "default")
 {
 	console.log(`Loading template ${template} | section: ${section}`);
 	
-	let template_obj = document.querySelector(template);
+	let template_obj = $(template);
 	for(let ele of template_obj.content.children)
 	{
 		Instance.appendChild(ele.cloneNode(true));
@@ -168,19 +168,19 @@ function GetCollectionRoot(ele)
 }
 function _albumMouseenter(e)
 {
-	let btn = this.querySelector(".add");
+	let btn = $(this, ".add");
 	if(btn)
 		btn.classList.remove("hidden");
-	btn = this.querySelector("a");
+	btn = $(this, "a");
 	if(btn)
 		btn.classList.remove("hidden");
 }
 function _albumMouseleave(e)
 {
-	let btn = this.querySelector(".add");
+	let btn = $(this, ".add");
 	if(btn)
 		btn.classList.add("hidden");
-	btn = this.querySelector("a");
+	btn = $(this, "a");
 	if(btn)
 		btn.classList.add("hidden");
 }
@@ -194,7 +194,7 @@ function _appendCollection(e)
 		Util.DisplayError("Error finding collection root");
 		return;
 	}
-	for(let ele of root.querySelectorAll("*[data-songid]"))
+	for(let ele of $$(root, "*[data-songid]"))
 	{
 		tracks.push(ele.dataset.songid);
 	}
@@ -224,28 +224,28 @@ function _showCollection(e)
 	let spot = document.getElementById("collection_spotlight");
 	let container = document.getElementById("collection_items");
 	container.innerHTML = "";
-	spot.querySelector("img").src = root.querySelector(".cover").src;
-	if(root.querySelector("*[data-title]"))
+	$(spot, "img").src = $(root, ".cover").src;
+	if(root.dataset.title || $(root, "*[data-title]"))
 	{
-		let t = root.querySelector("*[data-title]").dataset.title;
+		let t = root.dataset.title || $(root, "*[data-title]").dataset.title;
 		let i = t.indexOf("|");
 		if(i != -1)
 		{
 			let title = t.substring(0, i);
-			spot.querySelector(".collection_title").innerHTML = title;
-			let aa = spot.querySelector(".album_aliases");
+			$(spot, ".collection_title").innerHTML = title;
+			let aa = $(spot, ".album_aliases");
 			aa.classList.remove("hidden");
 			aa.innerHTML = t.substring(i+1);
 		}
 		else
 		{
-			spot.querySelector(".collection_title").innerHTML = t;
-			let aa = spot.querySelector(".album_aliases");
+			$(spot, ".collection_title").innerHTML = t;
+			let aa = $(spot, ".album_aliases");
 			if(!aa.classList.contains("hidden"))
 				aa.classList.add("hidden");
 		}
 	}
-	for(let song of root.querySelectorAll("*[data-songid]"))
+	for(let song of $$(root, "*[data-songid]"))
 	{
 		let id = song.dataset.songid;
 		let data = Cache.GetSongInfo(id);
@@ -338,6 +338,7 @@ function MakeAlbumTile(album)
 {
 	let albumDiv = document.createElement("div");
 	albumDiv.dataset.albumid = album.id;
+	albumDiv.dataset.title = album.title;
 	let albumInner = document.createElement("div");
 	albumInner.style.position = "relative";
 	albumInner.style.height = "auto";
@@ -353,7 +354,7 @@ function MakeAlbumTile(album)
 	if(Config.Get("lazy_loading"))
 		i.loading = "lazy";
 	i.setAttribute("src", location.href + album_thumbnail_path + album.id + "_400." + thumbnail_format);
-	i.setAttribute("alt", album.name);
+	i.setAttribute("alt", album.title);
 	albumInner.appendChild(i);
 	albumDiv.appendChild(albumInner);
 
@@ -361,9 +362,6 @@ function MakeAlbumTile(album)
 	{
 		let songs = document.createElement("div")
 		songs.classList.add("hidden");
-		let title = make("div");
-		title.dataset.title = album.name;
-		songs.appendChild(title);
 		for(let t of album.songs)
 		{
 			if(!Cache.GetSongInfo(t.id))
@@ -409,12 +407,12 @@ let Timeline = {
 	Draw: function() {
 		Clear();
 		LoadTemplate("#timeline_template");
-		Instance.querySelector("#day").addEventListener("click", this.SetMode.bind(this, "day"));
-		Instance.querySelector("#year").addEventListener("click", this.SetMode.bind(this, "year"));
-		Instance.querySelector("#month").addEventListener("click", this.SetMode.bind(this, "month"));
-		Instance.querySelector("#large").addEventListener("click", this.SetSize.bind(this, "large"));
-		Instance.querySelector("#medium").addEventListener("click", this.SetSize.bind(this, "medium"));
-		Instance.querySelector("#small").addEventListener("click", this.SetSize.bind(this, "small"));
+		$(Instance, "#day").addEventListener("click", this.SetMode.bind(this, "day"));
+		$(Instance, "#year").addEventListener("click", this.SetMode.bind(this, "year"));
+		$(Instance, "#month").addEventListener("click", this.SetMode.bind(this, "month"));
+		$(Instance, "#large").addEventListener("click", this.SetSize.bind(this, "large"));
+		$(Instance, "#medium").addEventListener("click", this.SetSize.bind(this, "medium"));
+		$(Instance, "#small").addEventListener("click", this.SetSize.bind(this, "small"));
 		this.SetMode(this.mode || Config.Get("views.timeline.default_grouping") || "day");
 		//this.Apply(this.songs);
 		this.SetSize(this.size || "medium");
@@ -450,7 +448,7 @@ let Timeline = {
 			{
 				if(!Config.Get("views.timeline.show_songs_with_no_date"))
 					continue;
-				innerWrapper = container.querySelector("#nodate");
+				innerWrapper = $(container, "#nodate");
 				if(!innerWrapper)
 				{
 					innerWrapper = document.createElement("div");
@@ -472,12 +470,12 @@ let Timeline = {
 					break;
 					case "year":
 						id = d.getUTCFullYear();
-						innerWrapper = container.querySelector("#_"+id);
+						innerWrapper = $(container, "#_"+id);
 						header.innerHTML = d.getUTCFullYear();
 					break;
 					case "month":
 						id = d.getUTCFullYear() + "-" + d.getUTCMonth();
-						innerWrapper = container.querySelector("#_"+id);
+						innerWrapper = $(container, "#_"+id);
 						header.innerHTML = Months[d.getUTCMonth()] + " " + d.getUTCFullYear();
 					break;
 				}
@@ -496,7 +494,7 @@ let Timeline = {
 			//Sort by album name
 			groups[date].sort(Util.SortSongsByAlbumName_Asc);
 
-			let alb = {"id": "", "name": "", "songs": []};
+			let alb = {"id": "", "title": "", "songs": []};
 			let artists = {};
 			for(let item of groups[date])
 			{
@@ -509,7 +507,7 @@ let Timeline = {
 					{
 						this.RenderAlbum(alb, innerWrapper);
 						alb.id = item.album_id;
-						alb.name = item.album;
+						alb.title = item.album;
 					}
 					alb.songs.push(item);
 				}
@@ -577,7 +575,7 @@ let Timeline = {
 					innerNode.appendChild(i);
 					newNode.appendChild(innerNode);
 
-					let addButton = newNode.querySelector("input");
+					let addButton = $(newNode, "input");
 					addButton.onclick = _appendCollection;
 
 					let songs = document.createElement("div");
@@ -627,12 +625,12 @@ let Timeline = {
 			break;
 		}
 
-		let aaBtn = albumDiv.querySelector("input");
+		let aaBtn = $(albumDiv, "input");
 		aaBtn.onclick = _appendCollection;
 
 		container.appendChild(albumDiv);
 		albumObj.id = "";
-		albumObj.name = "";
+		albumObj.title = "";
 		albumObj.songs = [];
 	},
 	_scrollDelegate: null,
@@ -685,9 +683,9 @@ let Timeline = {
 				this.mode = mode;
 			break;
 		}
-		for(let btn of Instance.querySelectorAll("#group_options button.active"))
+		for(let btn of $$(Instance, "#group_options button.active"))
 			btn.classList.remove("active");
-		let btn = Instance.querySelector("#"+mode);
+		let btn = $(Instance, "#"+mode);
 		btn.classList.add("active");
 
 		document.getElementById("items").innerHTML = "";
@@ -697,28 +695,28 @@ let Timeline = {
 	SetSize: function(size) {
 		let others;
 		this.size = size;
-		for(let btn of Instance.querySelectorAll("#size_buttons button.active"))
+		for(let btn of $$(Instance, "#size_buttons button.active"))
 			btn.classList.remove("active");
-		let btn = Instance.querySelector("#"+size);
+		let btn = $(Instance, "#"+size);
 		btn.classList.add("active");
 		switch(size)
 		{
 			case "small":
-				for(let item of Instance.querySelectorAll(".tile_med"))
+				for(let item of $$(Instance, ".tile_med"))
 					item.classList.replace("tile_med", "tile_sm");
-				for(let item of Instance.querySelectorAll(".tile_lg"))
+				for(let item of $$(Instance, ".tile_lg"))
 					item.classList.replace("tile_lg", "tile_sm");
 			break;
 			case "medium":
-				for(let item of Instance.querySelectorAll(".tile_sm"))
+				for(let item of $$(Instance, ".tile_sm"))
 					item.classList.replace("tile_sm", "tile_med");
-				for(let item of Instance.querySelectorAll(".tile_lg"))
+				for(let item of $$(Instance, ".tile_lg"))
 					item.classList.replace("tile_lg", "tile_med");
 			break;
 			case "large":
-				for(let item of Instance.querySelectorAll(".tile_sm"))
+				for(let item of $$(Instance, ".tile_sm"))
 					item.classList.replace("tile_sm", "tile_lg");
-				for(let item of Instance.querySelectorAll(".tile_med"))
+				for(let item of $$(Instance, ".tile_med"))
 					item.classList.replace("tile_med", "tile_lg");
 			break;
 
@@ -765,7 +763,7 @@ let Artists = {
 				i = artist.name.length;
 			let primaryName = artist.name.substring(0, i);
 			let ele = make("div", "<h2><a data-id='" + artist.id + "'>" + primaryName + "</a></h2>");
-			ele.querySelector("a").addEventListener("click", function(e){SetView("artist", this.dataset.id)});
+			$(ele, "a").addEventListener("click", function(e){SetView("artist", this.dataset.id)});
 			$("#artists").appendChild(ele);
 		}
 	},
@@ -776,7 +774,7 @@ let Artists = {
 		fetch(API + "artists.php?char=" + encodeURIComponent(e.target.innerHTML))
 		.then(response => response.json())
 		.then((function(data){
-			Instance.querySelector("#artists").innerHTML = "";
+			$(Instance, "#artists").innerHTML = "";
 			this.artists = data;
 			this.Apply(data);
 		}).bind(this));
@@ -817,13 +815,13 @@ let Artist = {
 		Clear();
 		LoadTemplate("#artist_template");
 
-		Instance.querySelector("a").addEventListener("click", function(e){SetView("artists");});
-		Instance.querySelector("#name").innerHTML = Util.EscHtml(this.info.name);
+		$(Instance, "a").addEventListener("click", function(e){SetView("artists");});
+		$(Instance, "#name").innerHTML = Util.EscHtml(this.info.name);
 
 		if(this.info.aliases)
-			Instance.querySelector("#aliases").innerHTML = Util.EscHtml(this.info.aliases);
+			$(Instance, "#aliases").innerHTML = Util.EscHtml(this.info.aliases);
 		else
-			Instance.querySelector("#aliases").classList.add("hidden");
+			$(Instance, "#aliases").classList.add("hidden");
 
 		if(this.info.countries && this.info.locations)
 		$(Instance, "#info").innerHTML = "Countries: " + (Util.EscHtml(this.info.countries) || "N/A") +
@@ -917,12 +915,12 @@ let Albums = {
 		{
 			//let albumDiv = document.createElement("div");
 			let albumDiv = MakeAlbumTile(album);
-			albumDiv.querySelector("i").removeEventListener("click", _showCollection);
-			albumDiv.querySelector("i").addEventListener("click", this._albumClick);
+			$(albumDiv, "img").removeEventListener("click", _showCollection);
+			$(albumDiv, "img").addEventListener("click", this._albumClick);
 			//albumDiv.dataset.albumid = album.id;
 			albumDiv.classList.add("tile_med", "collection");
 
-			let addBtn = albumDiv.querySelector("input");
+			let addBtn = $(albumDiv, "input");
 			addBtn.onclick = _appendCollection;
 
 			container.appendChild(albumDiv);
@@ -938,22 +936,22 @@ let Albums = {
 		let filteredOut = 0;
 		for(let album of this.albums)
 		{
-			if(Instance.querySelector("input[name=\"" + album.type + "\"]").checked)
+			if($(Instance, "input[name=\"" + album.type + "\"]").checked)
 			{
-				Instance.querySelector("*[data-albumid=\"" + album.id + "\"]").classList.remove("hidden");
+				$(Instance, "*[data-albumid=\"" + album.id + "\"]").classList.remove("hidden");
 			}
 			else
 			{
 				++filteredOut;
-				let ele = Instance.querySelector("*[data-albumid=\"" + album.id + "\"]");
+				let ele = $(Instance, "*[data-albumid=\"" + album.id + "\"]");
 				if(!ele.classList.contains("hidden"))
 					ele.classList.add("hidden");
 			}
 		}
 		if(filteredOut)
-			Instance.querySelector("#filter_notice").innerHTML = filteredOut + " album" + (filteredOut == 1 ? "":"s") + " filtered out";
+			$(Instance, "#filter_notice").innerHTML = filteredOut + " album" + (filteredOut == 1 ? "":"s") + " filtered out";
 		else
-			Instance.querySelector("#filter_notice").innerHTML = "";
+			$(Instance, "#filter_notice").innerHTML = "";
 	},
 	CheckboxToggled: function(e) {
 		this.ApplyFilters();
@@ -973,7 +971,7 @@ let Albums = {
 				Util.DisplayError(data.error_message);
 				return;
 			}
-			Instance.querySelector("#albums").innerHTML = "";
+			$(Instance, "#albums").innerHTML = "";
 			this.albums = data;
 			this.Apply(data);
 		}).bind(this));
@@ -1028,17 +1026,17 @@ let Random = {
 	Draw: function() {
 		Clear();
 		LoadTemplate("#random_template");
-		Instance.querySelector("#quantity").placeholder = Config.Get("views.random.default_song_count");
+		$(Instance, "#quantity").placeholder = Config.Get("views.random.default_song_count");
 
 		//Listeners
-		Instance.querySelector("select").addEventListener("input", this._typeChange);
-		Instance.querySelector("button").addEventListener("click", this.reroll.bind(this));
+		$(Instance, "select").addEventListener("input", this._typeChange);
+		$(Instance, "button").addEventListener("click", this.reroll.bind(this));
 
 		if(this.data)
 			this.Apply(this.data);
 	},
 	Apply: function(data) {
-		let container = Instance.querySelector("#items");
+		let container = $(Instance, "#items");
 		switch(data.type)
 		{
 			case "song":
@@ -1056,7 +1054,7 @@ let Random = {
 		}
 	},
 	DrawSongs: function(items) {
-		let container = Instance.querySelector("#items");
+		let container = $(Instance, "#items");
 		for(let song of items)
 		{
 			Cache.SetSongInfo(song.id, song);
@@ -1084,7 +1082,7 @@ let Random = {
 			let albumDiv = MakeAlbumTile(album);
 			albumDiv.classList.add("tile_med");
 
-			let addBtn = albumDiv.querySelector("input");
+			let addBtn = $(albumDiv, "input");
 			addBtn.onclick = _appendCollection;
 
 			container.appendChild(albumDiv);
@@ -1092,7 +1090,7 @@ let Random = {
 	},
 	data: null,
 	reroll: function() {
-		Instance.querySelector("#items").innerHTML = "";
+		$(Instance, "#items").innerHTML = "";
 		fetch(API + "random.php" + this.makeGetString())
 		.then(response => response.json())
 		.then((function(data) {
@@ -1102,8 +1100,8 @@ let Random = {
 		.catch(err => Util.DisplayError("Error getting random items: " + err.message));
 	},
 	makeGetString: function() {
-		let type = document.querySelector("select").value;
-		let qt = document.querySelector("#quantity").value;
+		let type = $(Instance, "select").value;
+		let qt = $(Instance, "#quantity").value;
 		if(type == "song" && qt.length == 0)
 			return "";
 		if(qt.length == 0)
@@ -1111,7 +1109,7 @@ let Random = {
 		return "?type=" + type + "&count=" + Number(qt) + "&resolve=1";
 	},
 	_typeChange: function(e) {
-		Instance.querySelector("#quantity").placeholder = Config.Get("views.random.default_" + e.target.value + "_count");
+		$(Instance, "#quantity").placeholder = Config.Get("views.random.default_" + e.target.value + "_count");
 	}
 };
 
