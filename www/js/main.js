@@ -146,20 +146,13 @@ function _queueClick(e)
 	if(id)
 	{
 		console.log("Click on queue item index: " + i + ",id:" + id);
-		if(Player.IsLoaded(id))
+		if(Player.GetState() == Player.PlayerState.Playing)
 		{
-			if(Player.GetState() == Player.PlayerState.Playing)
-			{
-				console.log("TODO - The player should be able to start a song while already playing one without issue");
-				return;
-			}
-			Player.SetActiveIndex(i);
-			Player.BeginPlayback();
+			console.log("TODO - The player should be able to start a song while already playing one without issue");
+			return;
 		}
-		else
-		{
-			Player.Load(id);
-		}
+		Player.SetActiveIndex(i);
+		Player.BeginPlayback(id);
 	}
 }
 document.getElementById("queue").addEventListener("click", _queueClick);

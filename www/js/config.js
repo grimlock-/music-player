@@ -5,6 +5,7 @@ const defaultSettings =
 	default_view: "timeline",
 	theme: "theme-one",
 	sounds: true,
+	lazy_loading: true,
 	queue: {
 		//Remove songs from queue when they finish playing
 		remove_after_playback: false,

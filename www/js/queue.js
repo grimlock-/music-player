@@ -1,7 +1,7 @@
 /**
  * FIXME - After moving the active index from here to playback.js, 
  * removing entries from the list will not update the active index
- * accordingly. The best remedy seems to be adding an event for
+ * accordingly. The best remedy seems to be firing an event for
  * queue modifications, but I want to think on this some more
  */
 import * as Config from './config.js';

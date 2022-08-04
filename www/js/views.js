@@ -334,6 +334,51 @@ document.getElementById("collection_spotlight").querySelector(".close").addEvent
 document.getElementById("collection_spotlight").querySelector(".download").addEventListener("click", _downloadCollection);
 document.getElementById("main_panel").addEventListener("scroll", UpdateSpotlightPosition);
 
+function MakeAlbumTile(album)
+{
+	let albumDiv = document.createElement("div");
+	albumDiv.dataset.albumid = album.id;
+	let albumInner = document.createElement("div");
+	albumInner.style.position = "relative";
+	albumInner.style.height = "auto";
+	albumInner.innerHTML = "<input type=\"image\" src=\"img/plus.svg\" width=\"40px\" height=\"40px\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_art_path + album.id + "." + thumbnail_format + "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/external-link.svg\" width=\"25px\" height=\"25px\"></a>";
+	albumDiv.onmouseenter = _albumMouseenter;
+	albumDiv.onmouseleave = _albumMouseleave;
+	let i = document.createElement("img");
+	i.classList.add("cover");
+	i.addEventListener("error", _albumArtError);
+	i.addEventListener("click", _showCollection);
+	i.setAttribute("width", 200);
+	i.setAttribute("height", 200);
+	if(Config.Get("lazy_loading"))
+		i.loading = "lazy";
+	i.setAttribute("src", location.href + album_thumbnail_path + album.id + "_400." + thumbnail_format);
+	i.setAttribute("alt", album.name);
+	albumInner.appendChild(i);
+	albumDiv.appendChild(albumInner);
+
+	if(album.songs)
+	{
+		let songs = document.createElement("div")
+		songs.classList.add("hidden");
+		let title = make("div");
+		title.dataset.title = album.name;
+		songs.appendChild(title);
+		for(let t of album.songs)
+		{
+			if(!Cache.GetSongInfo(t.id))
+				Cache.SetSongInfo(t.id, t);
+			let newEle = make("span");
+			newEle.dataset.songid = t.id;
+			newEle.innerHTML = t.title;
+			songs.appendChild(newEle);
+		}
+		albumDiv.appendChild(songs);
+	}
+
+	return albumDiv;
+}
+
 
 
 let Timeline = {
@@ -523,6 +568,8 @@ let Timeline = {
 					i.addEventListener("click", _showCollection);
 					i.setAttribute("width", 200);
 					i.setAttribute("height", 200);
+					if(Config.Get("lazy_loading"))
+						i.loading = "lazy";
 					if(artist == "No Artist")
 						i.src = "img/noartist.png";
 					else
@@ -562,7 +609,8 @@ let Timeline = {
 	RenderAlbum: function(albumObj, container) {
 		if(!albumObj.id)
 			return;
-		let albumDiv = document.createElement("div");
+		//let albumDiv = document.createElement("div");
+		let albumDiv = MakeAlbumTile(albumObj);
 		switch(this.size)
 		{
 			case "small":
@@ -578,42 +626,9 @@ let Timeline = {
 				albumDiv.classList.add("tile_med", "collection");
 			break;
 		}
-		let albumInner = document.createElement("div");
-		albumInner.style.position = "relative";
-		albumInner.style.height = "auto";
-		albumInner.innerHTML = "<input type=\"image\" src=\"img/plus.svg\" width=\"40px\" height=\"40px\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_art_path + albumObj.id + "." + thumbnail_format + "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/external-link.svg\" width=\"25px\" height=\"25px\"></a>";
-		albumDiv.onmouseenter = _albumMouseenter;
-		albumDiv.onmouseleave = _albumMouseleave;
-		let i = document.createElement("img");
-		i.classList.add("cover");
-		i.addEventListener("error", _albumArtError);
-		i.addEventListener("click", _showCollection);
-		i.setAttribute("width", 200);
-		i.setAttribute("height", 200);
-		i.setAttribute("src", location.href + album_thumbnail_path + albumObj.id + "_400." + thumbnail_format);
-		i.setAttribute("alt", albumObj.name);
-		albumInner.appendChild(i);
-		albumDiv.appendChild(albumInner);
-
 
 		let aaBtn = albumDiv.querySelector("input");
 		aaBtn.onclick = _appendCollection;
-
-		let songs = document.createElement("div");
-		songs.classList.add("hidden");
-		//add album stuff
-		let title = document.createElement("div");
-		title.dataset.title = albumObj.name;
-		songs.appendChild(title);
-		//add songs
-		for(let t of albumObj.songs)
-		{
-			let newEle = document.createElement("span");
-			newEle.dataset.songid = t.id;
-			newEle.innerHTML = t.title;
-			songs.appendChild(newEle);
-		}
-		albumDiv.appendChild(songs);
 
 		container.appendChild(albumDiv);
 		albumObj.id = "";
@@ -624,19 +639,17 @@ let Timeline = {
 	ScrollListener: function() {
 		let mp = $("#main_panel");
 		this.lastScrollPosition = mp.scrollTop;
-		if(!mp.scrollTopMax)
-		{
-			if(!this.requestingNextChunk)
-				this.GetNextChunk();
-		}
-		else
-		{
-			let trigger = Config.Get("views.timeline.next_chunk_scroll_percent");
-			if(trigger > 1)
-				trigger = trigger / 100;
-			if(mp.scrollTop / mp.scrollTopMax >= trigger && !this.requestingNextChunk)
-				this.GetNextChunk();
-		}
+		//console.group("scroll event");
+		let scrollMax = mp.scrollHeight - mp.clientHeight;
+		//console.log("pos: " + mp.scrollTop + " / " + scrollMax + " (Max)");
+
+		let trigger = Config.Get("views.timeline.next_chunk_scroll_percent");
+		if(trigger > 1)
+			trigger = trigger / 100;
+		//console.log("pos: " + (mp.scrollTop/scrollMax) + "% / " + trigger + "%");
+		if(mp.scrollTop / scrollMax >= trigger && !this.requestingNextChunk)
+			this.GetNextChunk();
+		//console.groupEnd();
 	},
 	GetNextChunk: async function() {
 		this.requestingNextChunk = true;
@@ -902,47 +915,16 @@ let Albums = {
 		let container = document.getElementById("albums");
 		for(let album of data)
 		{
-			let albumDiv = document.createElement("div");
-			albumDiv.dataset.albumid = album.id;
+			//let albumDiv = document.createElement("div");
+			let albumDiv = MakeAlbumTile(album);
+			albumDiv.querySelector("i").removeEventListener("click", _showCollection);
+			albumDiv.querySelector("i").addEventListener("click", this._albumClick);
+			//albumDiv.dataset.albumid = album.id;
 			albumDiv.classList.add("tile_med", "collection");
-			albumDiv.addEventListener("click", _showCollection);
-			let albumInner = document.createElement("div");
-			albumInner.style.position = "relative";
-			albumInner.style.height = "auto";
-			albumInner.innerHTML = "<input type=\"image\" src=\"img/plus.svg\" width=\"40px\" height=\"40px\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_art_path + album.id + "." + thumbnail_format+ "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/external-link.svg\" width=\"25px\" height=\"25px\"></a>";
-			albumDiv.onmouseenter = _albumMouseenter;
-			albumDiv.onmouseleave = _albumMouseleave;
-			let i = document.createElement("img");
-			i.classList.add("cover");
-			i.addEventListener("error", _albumArtError);
-			i.setAttribute("width", 200);
-			i.setAttribute("height", 200);
-			i.setAttribute("src", location.href + album_thumbnail_path + album.id + "_400." + thumbnail_format);
-			i.setAttribute("alt", album.name);
-			albumInner.appendChild(i);
-			albumDiv.appendChild(albumInner);
 
 			let addBtn = albumDiv.querySelector("input");
 			addBtn.onclick = _appendCollection;
 
-			if(album.songs)
-			{
-				let songs = document.createElement("div")
-				songs.classList.add("hidden");
-				for(let t of album.songs)
-				{
-					let newEle = document.createElement("span");
-					newEle.dataset.songid = t.id;
-					newEle.innerHTML = t.title;
-					songs.appendChild(newEle);
-				}
-				albumDiv.appendChild(songs);
-			}
-			else
-			{
-				//TODO
-				console.log("Add click listener to fetch album songs");
-			}
 			container.appendChild(albumDiv);
 		}
 		this.ApplyFilters();
@@ -995,6 +977,9 @@ let Albums = {
 			this.albums = data;
 			this.Apply(data);
 		}).bind(this));
+	},
+	_albumClick: function(e) {
+		console.log("TODO - Get album songs if you can't find any");
 	}
 }
 
@@ -1095,46 +1080,12 @@ let Random = {
 		let container = document.getElementById("items");
 		for(let album of items)
 		{
-			let albumDiv = document.createElement("div");
-			albumDiv.dataset.albumid = album.id;
+			//let albumDiv = document.createElement("div");
+			let albumDiv = MakeAlbumTile(album);
 			albumDiv.classList.add("tile_med");
-			let albumInner = document.createElement("div");
-			albumInner.style.position = "relative";
-			albumInner.style.height = "auto";
-			albumInner.innerHTML = "<input type=\"image\" src=\"img/plus.svg\" width=\"40px\" height=\"40px\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_art_path + album.id + "." + thumbnail_format + "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/external-link.svg\" width=\"25px\" height=\"25px\"></a>";
-			albumDiv.onmouseenter = _albumMouseenter;
-			albumDiv.onmouseleave = _albumMouseleave;
-			let i = document.createElement("img");
-			i.addEventListener("error", _albumArtError);
-			i.setAttribute("width", 200);
-			i.setAttribute("height", 200);
-			i.setAttribute("src", location.href + album_thumbnail_path + album.id + "_400." + thumbnail_format);
-			i.setAttribute("alt", album.name);
-			albumInner.appendChild(i);
-			albumDiv.appendChild(albumInner);
 
 			let addBtn = albumDiv.querySelector("input");
 			addBtn.onclick = _appendCollection;
-
-			if(album.songs)
-			{
-				let songs = document.createElement("div")
-				songs.classList.add("hidden");
-				for(let t of album.songs)
-				{
-					if(!Cache.GetSongInfo(t.id))
-						Cache.SetSongInfo(t.id, t);
-					let newEle = document.createElement("span");
-					newEle.dataset.songid = t.id;
-					newEle.innerHTML = t.title;
-					songs.appendChild(newEle);
-				}
-				albumDiv.appendChild(songs);
-			}
-			else
-			{
-				console.log("Add click listener to fetch album songs");
-			}
 
 			container.appendChild(albumDiv);
 		}

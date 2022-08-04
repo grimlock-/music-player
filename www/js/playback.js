@@ -12,14 +12,19 @@ import * as Util from './util.js';
 const API = location.href + "api/";
 
 let Context = new AudioContext({latencyHint: "playback"});
+let MasterGain = Context.createGain();
+//TODO - Uncomment me when https://bugzilla.mozilla.org/show_bug.cgi?id=1410365 is resolved
+await Context.audioWorklet.addModule("js/audio-worklets.js");
+let SwapNode = new AudioWorkletNode(Context, "buffered-swap");
 let Element = new Audio();
+let ElementNode = Context.createMediaElementSource(Element);
 Element.autoplay = true;
 Element.addEventListener("ended", _elementPlaybackEnded);
 Element.addEventListener("canplay", function(e){
+	console.log("<audio>: canplay event");
 	let id = this.src.substring(this.src.indexOf('=')+1);
 	if(!IsLoaded(id))
 	{
-		this.play();
 		SetCurrentSong(id);
 		PlaybackStart = Date.now();
 		SetState(PlayerState.Playing);
@@ -27,14 +32,15 @@ Element.addEventListener("canplay", function(e){
 	else
 	{
 		this.src = "";
-		load();
 	}
 });
 let SwitchingAudio = false;
-let MasterGain = Context.createGain();
 //Gain nodes are apparently always created at full volume
 SetGain(document.getElementById("volume_slider").value);
 MasterGain.connect(Context.destination);
+SwapNode.connect(MasterGain);
+ElementNode.connect(SwapNode);
+//ElementNode.connect(MasterGain);
 let PlayCache = {};
 export const PlayerState = {
 	"Idle": 0,
@@ -118,7 +124,7 @@ function SetState(state)
 		case PlayerState.Stopping:
 			State = state;
 			document.getElementById("playpause").classList.remove("pause", "loading");
-			document.getElementById("playpause").classList.remove("play");
+			document.getElementById("playpause").classList.add("play");
 			if(Monitor)
 			{
 				clearInterval(Monitor);
@@ -133,6 +139,12 @@ function SetState(state)
 				navigator.mediaSession.setActionHandler("stop", null);
 				navigator.mediaSession.setActionHandler("nexttrack", null);
 			}*/
+		break;
+
+		case PlayerState.Switching:
+			State = state;
+			document.getElementById("playpause").classList.remove("play", "loading");
+			document.getElementById("playpause").classList.add("pause");
 		break;
 
 		default:
@@ -163,9 +175,11 @@ export function SetActiveIndex(i)
 
 export function PlayFromIdle()
 {
+	Context.resume();
 	let id = Queue.Get(ActiveQueueIndex);
 	if(id === null)
 		return;
+	SetState(PlayerState.Loading);
 	BeginPlayback(id);
 }
 /*if(navigator.mediaSession)
@@ -180,7 +194,6 @@ else
 
 export function BeginPlayback(id)
 {
-	//let id = Queue.Get(ActiveQueueIndex);
 	if(!id)
 	{
 		console.error("Empty song id");
@@ -191,7 +204,8 @@ export function BeginPlayback(id)
 	{
 		CurrentNode = PlayCache[id].node;
 		PlayCache[id].node = null;
-		CurrentNode.connect(MasterGain);
+		CurrentNode.connect(SwapNode);
+		//CurrentNode.connect(MasterGain);
 		if(Looping == Loop.Track)
 			CurrentNode.loop = true;
 		CurrentNode.start();
@@ -204,7 +218,6 @@ export function BeginPlayback(id)
 	{
 		Element.src = API + "song.php?id=" + encodeURIComponent(id);
 		Load(id);
-		SetState(PlayerState.Loading);
 	}
 
 	//Media Session
@@ -280,7 +293,7 @@ function SwitchPlayback(id)
 		return;
 	}
 
-	console.group("SwitchPlayback()");
+	console.log("SwitchPlayback()");
 	console.log("Current time: " + Element.currentTime);
 	console.log("Start time: " + PlaybackStart);
 	SwitchingAudio = true;
@@ -289,31 +302,27 @@ function SwitchPlayback(id)
 	let time = Element.currentTime;
 
 	//Stop audio element
-	Element.pause();
+	ElementNode.disconnect();
 	Element.src = "";
-	Element.load();
 
 	//Play via buffer node
 	CurrentNode = PlayCache[id].node;
 	PlayCache[id].node = null;
-	CurrentNode.connect(MasterGain);
+	CurrentNode.connect(SwapNode);
+	//CurrentNode.connect(MasterGain);
 	if(Looping == Loop.Track)
 		CurrentNode.loop = true;
 
 	CurrentNode.start(Context.currentTime, time);
 
-	SetCurrentSong(id);
-	SetState(PlayerState.Playing);
-	
 	SwitchingAudio = false;
-	console.groupEnd();
 }
 function _nodePlaybackEnded(e)
 {
 	if(State == PlayerState.Paused)
 		return;
 
-	console.log("Playback finished (audio node)");
+	console.log("AudioBufferSourceNode: ended event");
 	this.disconnect();
 	if(CurrentNode === this)
 		CurrentNode = null;
@@ -364,27 +373,29 @@ function _nodePlaybackEnded(e)
 		}
 
 		let next = Queue.NextSong(ActiveQueueIndex, Looping == Loop.Queue);
-		if(next === null)
+		if(next)
 		{
-			Stop();
+			console.log("next song is " + next);
+			ActiveQueueIndex = (ActiveQueueIndex+1) % Queue.Count();
+			BeginPlayback(next);
 		}
 		else
 		{
-			ActiveQueueIndex = (ActiveQueueIndex+1) % Queue.Count();
-			BeginPlayback(next);
+			Stop();
 		}
 
 	}
 }
 function _elementPlaybackEnded(e)
 {
-	console.log("Playback finished (audio element)");
+	console.log("<audio> ended event");
 	if(SwitchingAudio)
 		return;
 	if(CurrentlyLoading == CurrentSong && LoadingXhr !== null)
 	{
 		LoadingXhr.abort();
 		LoadingXhr = null;
+		CurrentlyLoading = null;
 	}
 	let id = Queue.Get(++ActiveQueueIndex);
 	if(id)
@@ -436,13 +447,8 @@ function Heartbeat()
 				Load(next);
 		break;
 
-		case PlayerState.Loading:
-		case PlayerState.Idle:
-			//nothing
-		break;
-
 		default:
-			console.error("Unknown player state: " + State);
+			//nothing
 		break;
 	}
 }
@@ -525,7 +531,8 @@ export function Load(id)
 			switch(State)
 			{
 				case PlayerState.Playing:
-					SwitchPlayback(id);
+					if(CurrentSong == id)
+						SwitchPlayback(id);
 				break;
 
 				case PlayerState.Paused:
@@ -541,6 +548,7 @@ export function Load(id)
 				default:
 					//idle
 					//stopping
+					//switching
 				break;
 			}
 		})
@@ -615,9 +623,11 @@ export function Unload(id)
 
 export function Resume()
 {
+	//TODO - need to stream if it hasn't finished loading
 	CurrentNode = PlayCache[CurrentSong].node;
 	PlayCache[CurrentSong].node = null;
-	CurrentNode.connect(MasterGain);
+	CurrentNode.connect(SwapNode);
+	//CurrentNode.connect(MasterGain);
 	if(Looping == Loop.Track)
 		CurrentNode.loop = true;
 	CurrentNode.start(Context.currentTime, PlaybackStart/1000);
@@ -649,37 +659,43 @@ export function Pause()
 export function Stop()
 {
 	SetState(PlayerState.Stopping);
+
 	if(LoadingXhr)
 	{
 		LoadingXhr.abort();
 		LoadingXhr = null;
 	}
+
+	SwapNode.port.postMessage("stop");
 	if(CurrentNode)
-	{
 		CurrentNode.stop();
-	}
 	else if(Element.src != null)
-	{
-		Element.pause();
 		Element.src = "";
-		Element.load();
-	}
-	else
-	{
-		SetState(PlayerState.Idle);
-	}
+
+	Context.suspend();
+
+	SetState(PlayerState.Idle);
 }
 
 export function SetGain(value)
 {
 	MasterGain.gain.setValueAtTime(value, Context.currentTime);
-	Element.volume = value;
+	//Element.volume = value;
 }
 
 export function NextSong()
 {
+	if(CurrentlyLoading == CurrentSong)
+	{
+		LoadingXhr.abort();
+		LoadingXhr = null;
+		CurrentlyLoading = null;
+	}
+		
 	if(CurrentNode)
+	{
 		CurrentNode.stop();
+	}
 }
 
 export function LoopTrack()
