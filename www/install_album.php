@@ -120,7 +120,7 @@ function Albums()
 			DELETE FROM temp_table;
 			CREATE TEMPORARY TABLE IF NOT EXISTS split_results(parts TEXT);
 			DELETE FROM split_results;
-			CALL split(aliases, ',');
+			CALL split(aliases, ';');
 			INSERT temp_table SELECT * FROM (SELECT albumid) a CROSS JOIN split_results b;
 
 			DELETE album_aliases
