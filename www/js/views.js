@@ -228,23 +228,21 @@ function _showCollection(e)
 	if(root.dataset.title || $(root, "*[data-title]"))
 	{
 		let t = root.dataset.title || $(root, "*[data-title]").dataset.title;
-		let i = t.indexOf("|");
-		if(i != -1)
-		{
-			let title = t.substring(0, i);
-			$(spot, ".collection_title").innerHTML = title;
-			let aa = $(spot, ".album_aliases");
-			aa.classList.remove("hidden");
-			aa.innerHTML = t.substring(i+1);
-		}
-		else
-		{
-			$(spot, ".collection_title").innerHTML = t;
-			let aa = $(spot, ".album_aliases");
-			if(!aa.classList.contains("hidden"))
-				aa.classList.add("hidden");
-		}
+		$(spot, ".collection_title").innerHTML = t;
 	}
+	if(root.dataset.aliases)
+	{
+		let aa = $(spot, ".album_aliases");
+		aa.classList.remove("hidden");
+		aa.innerHTML = root.dataset.aliases;
+	}
+	else
+	{
+		let aa = $(spot, ".album_aliases");
+		if(!aa.classList.contains("hidden"))
+			aa.classList.add("hidden");
+	}
+
 	for(let song of $$(root, "*[data-songid]"))
 	{
 		let id = song.dataset.songid;
@@ -252,7 +250,7 @@ function _showCollection(e)
 		if(!data)
 			continue;
 		let text = "";
-		let ele = document.createElement("div");
+		let ele = make("div");
 		ele.dataset.songid = id;
 		if(data.track_number)
 			text += data.track_number + " - ";
@@ -336,16 +334,24 @@ document.getElementById("main_panel").addEventListener("scroll", UpdateSpotlight
 
 function MakeAlbumTile(album)
 {
-	let albumDiv = document.createElement("div");
+	let albumDiv = make("div");
 	albumDiv.dataset.albumid = album.id;
-	albumDiv.dataset.title = album.title;
-	let albumInner = document.createElement("div");
+	if(album.title.indexOf(";") == -1)
+	{
+		albumDiv.dataset.title = album.title;
+	}
+	else
+	{
+		albumDiv.dataset.title = album.title.substring(0, album.title.indexOf(";"));
+		albumDiv.dataset.aliases = album.title.substring(album.title.indexOf(";")+1);
+	}
+	let albumInner = make("div");
 	albumInner.style.position = "relative";
 	albumInner.style.height = "auto";
 	albumInner.innerHTML = "<input type=\"image\" src=\"img/plus.svg\" width=\"40px\" height=\"40px\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_art_path + album.id + "." + thumbnail_format + "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/external-link.svg\" width=\"25px\" height=\"25px\"></a>";
 	albumDiv.onmouseenter = _albumMouseenter;
 	albumDiv.onmouseleave = _albumMouseleave;
-	let i = document.createElement("img");
+	let i = make("img");
 	i.classList.add("cover");
 	i.addEventListener("error", _albumArtError);
 	i.addEventListener("click", _showCollection);
@@ -360,7 +366,7 @@ function MakeAlbumTile(album)
 
 	if(album.songs)
 	{
-		let songs = document.createElement("div")
+		let songs = make("div")
 		songs.classList.add("hidden");
 		for(let t of album.songs)
 		{
@@ -440,10 +446,10 @@ let Timeline = {
 		let keys = Object.keys(groups).sort(Util.SortDates_Desc);
 		for(let date of keys)
 		{
-			let wrapper = document.createElement("div");
+			let wrapper = make("div");
 			let innerWrapper;
 			let d = new Date(date);
-			let header = document.createElement("h3");
+			let header = make("h3");
 			if(date.substring(0,4) == "0000")
 			{
 				if(!Config.Get("views.timeline.show_songs_with_no_date"))
@@ -451,7 +457,7 @@ let Timeline = {
 				innerWrapper = $(container, "#nodate");
 				if(!innerWrapper)
 				{
-					innerWrapper = document.createElement("div");
+					innerWrapper = make("div");
 					innerWrapper.id = "nodate";
 					header.innerHTML = "No import date set";
 					wrapper.appendChild(header);
@@ -481,7 +487,7 @@ let Timeline = {
 				}
 				if(!innerWrapper)
 				{
-					innerWrapper = document.createElement("div");
+					innerWrapper = make("div");
 					innerWrapper.id = "_"+id;
 					innerWrapper.classList.add("tile_collection");
 					wrapper.appendChild(header);
@@ -530,7 +536,7 @@ let Timeline = {
 				if(artists[artist].length == 1)
 				{
 					let item = artists[artist][0];
-					let newNode = document.createElement("div");
+					let newNode = make("div");
 					newNode.innerHTML = item.title + " | " + item.artists + " | " + item.genre + " | " + Util.StoMS(item.duration);
 					newNode.dataset.songid = item.id;
 					newNode.addEventListener("click", _addSong);
@@ -538,7 +544,7 @@ let Timeline = {
 				}
 				else if(artists[artist].length > 1)
 				{
-					let newNode = document.createElement("div");
+					let newNode = make("div");
 					switch(this.size)
 					{
 						case "small":
@@ -554,14 +560,14 @@ let Timeline = {
 							newNode.classList.add("tile_med", "collection");
 						break;
 					}
-					let innerNode = document.createElement("div");
+					let innerNode = make("div");
 					innerNode.style.position = "relative";
 					innerNode.style.height = "auto";
 					//newNode.innerHTML = "<strong>" + artist + "</strong>: " + artists[artist].length + " songs";
 					innerNode.innerHTML = "<input type=\"image\" src=\"img/plus.svg\" width=\"40px\" height=\"40px\" alt=\"Add songs to queue\" class=\"add hidden\" /></div>";
 					newNode.onmouseenter = _albumMouseenter;
 					newNode.onmouseleave = _albumMouseleave;
-					let i = document.createElement("img");
+					let i = make("img");
 					i.classList.add("cover");
 					i.addEventListener("click", _showCollection);
 					i.setAttribute("width", 200);
@@ -578,18 +584,17 @@ let Timeline = {
 					let addButton = $(newNode, "input");
 					addButton.onclick = _appendCollection;
 
-					let songs = document.createElement("div");
+					let songs = make("div");
 					songs.classList.add("hidden");
 					//title
-					let title = document.createElement("div");
+					let title = make("div");
 					title.dataset.title = artist;
 					songs.appendChild(title);
 					//songs
 					for(let song of artists[artist])
 					{
-						let newEle = document.createElement("span");
+						let newEle = make("span", song.title);
 						newEle.dataset.songid = song.id;
-						newEle.innerHTML = song.title;
 						songs.appendChild(newEle);
 					}
 					newNode.appendChild(songs);
@@ -607,7 +612,7 @@ let Timeline = {
 	RenderAlbum: function(albumObj, container) {
 		if(!albumObj.id)
 			return;
-		//let albumDiv = document.createElement("div");
+		//let albumDiv = make("div");
 		let albumDiv = MakeAlbumTile(albumObj);
 		switch(this.size)
 		{
@@ -898,7 +903,7 @@ let Albums = {
 		//Checkboxes
 		for(let type of this.types)
 		{
-			let l = document.createElement("label");
+			let l = make("label");
 			l.innerHTML = "<input type=\"checkbox\" name=\"" + type + "\" checked>" + type + "</input>";
 			l.firstChild.addEventListener("change", this.CheckboxToggled.bind(this));
 			document.getElementById("album_type_filter").appendChild(l);
@@ -913,7 +918,7 @@ let Albums = {
 		let container = document.getElementById("albums");
 		for(let album of data)
 		{
-			//let albumDiv = document.createElement("div");
+			//let albumDiv = make("div");
 			let albumDiv = MakeAlbumTile(album);
 			$(albumDiv, "img").removeEventListener("click", _showCollection);
 			$(albumDiv, "img").addEventListener("click", this._albumClick);
@@ -1060,7 +1065,7 @@ let Random = {
 			Cache.SetSongInfo(song.id, song);
 
 			//Html stuff
-			let newNode = document.createElement("div");
+			let newNode = make("div");
 			newNode.innerHTML = (song.title ? song.title : "<strong>Untitled</strong>") + " | " + (song.genre ? song.genre : "<strong>No Genre</strong>") + " | " + (song.album ? song.album : "<strong>No Album</strong>");
 			if(song.artists)
 				newNode.innerHTML += " | " + song.artists;
@@ -1078,7 +1083,7 @@ let Random = {
 		let container = document.getElementById("items");
 		for(let album of items)
 		{
-			//let albumDiv = document.createElement("div");
+			//let albumDiv = make("div");
 			let albumDiv = MakeAlbumTile(album);
 			albumDiv.classList.add("tile_med");
 

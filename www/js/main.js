@@ -37,7 +37,8 @@ function XhrErrorCheck(response, errMsg1 = "", errMsg2 = "")
 window.make = function(element, content)
 {
 	let ele = document.createElement(element);
-	ele.innerHTML = content;
+	if(content)
+		ele.innerHTML = content;
 	return ele;
 }
 window.$ = function(first, second)
