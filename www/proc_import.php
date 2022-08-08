@@ -54,6 +54,11 @@ function commandline_print($message)
 		echo $message;
 }
 
+function set_status($message)
+{
+	file_put_contents("api/library_scan.lock", $message);
+}
+
 
 //Start
 commandline_print("Starting import\n");

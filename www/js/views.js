@@ -575,7 +575,7 @@ let Timeline = {
 					if(Config.Get("lazy_loading"))
 						i.loading = "lazy";
 					if(artist == "No Artist")
-						i.src = "img/noartist.png";
+						i.src = "img/no_artist.png";
 					else
 						i.src = "img/artist_fallback.png";
 					innerNode.appendChild(i);

@@ -13,6 +13,11 @@ require("getid3/getid3.php");
 $print_allowed = false;
 $debug = false;
 
+function set_status($message)
+{
+	file_put_contents("api/thumbnails.lock", $message);
+}
+
 switch($thumbnail_format)
 {
 	case "jpg":
@@ -213,6 +218,7 @@ function commandline_print($message)
 
 
 //Start
+set_status("Initializing");
 //Since cli_set_process_title wasn't working
 if(file_exists("/proc/".getmypid()."/comm"))
 	file_put_contents("/proc/".getmypid()."/comm", "music_thumbnail_generator");
@@ -282,6 +288,7 @@ foreach($artistdirs as $adir)
 
 //Handle songs with embedded art
 commandline_print("Handling songs with embedded art\n");
+set_status("Extracting embedded art");
 $sql = "SELECT id,filepath FROM songs WHERE embedded_art = 1;";
 $result = $db->query($sql);
 if($result)
@@ -312,6 +319,7 @@ if($result)
 
 //Handle songs with their own art
 commandline_print("Handling songs with non-embedded art\n");
+set_status("Processing song art");
 $i = 0;
 $sql = "SELECT id,filepath FROM songs WHERE art = 'song';";
 $result = $db->query($sql);
@@ -336,6 +344,7 @@ if($result)
 
 //Handle albums
 commandline_print("Handling albums\n");
+set_status("Processing album art");
 $j = 0;
 $len = count($albumdirs);
 commandline_print("Found $len album directories\n");

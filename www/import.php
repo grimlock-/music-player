@@ -14,10 +14,6 @@ function import_error($message)
 	GLOBAL $start_time;
 	file_put_contents("log/".$start_time."_error.txt", $message, FILE_APPEND | LOCK_EX);
 }
-function set_status($message)
-{
-	file_put_contents("api/library_scan.lock", $message);
-}
 function log_changes($message)
 {
 	GLOBAL $debug;

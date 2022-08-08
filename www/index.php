@@ -9,7 +9,7 @@
 	<link rel="icon" type="image/x-icon" href="favicon.ico" />
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<link rel="preload" href="img/album.png" as="image" />
-	<link rel="preload" href="img/noartist.png" as="image" />
+	<link rel="preload" href="img/no_artist.png" as="image" />
 	<link rel="preload" href="img/artist_fallback.png" as="image" />
 	<script>
 	<?php
