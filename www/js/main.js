@@ -346,9 +346,36 @@ document.getElementById("loop").addEventListener("click", function(e){
 		break;
 	}
 });
-document.getElementById("shuffle").addEventListener("click", function(e){
+$("#shuffle").addEventListener("click", function(e){
 	Queue.Shuffle();
 });
-document.getElementById("divider").addEventListener("mousedown", function(e) {
-	console.log("divider mousedown");
+
+
+$("#divider").addEventListener("mousedown", function(e) {
+	document.body.classList.add("noselect");
+	document.body.addEventListener("mousemove", _resizeQueue);
+	document.body.addEventListener("mouseup", _stopResizing);
+});
+function _resizeQueue(e)
+{
+	let w_str = getComputedStyle($("#content")).getPropertyValue("--queue-width");
+	let w = Number(w_str.substring(0, w_str.indexOf("px")));
+
+	let new_w = Util.Clamp(w + e.movementX, 100, 900) + "px";
+	$("#content").style.setProperty("--queue-width", new_w);
+	localStorage.setItem("queue_width", new_w)
+}
+function _stopResizing(e)
+{
+	document.body.classList.remove("noselect");
+	document.body.removeEventListener("mousemove", _resizeQueue);
+	document.body.removeEventListener("mouseup", _stopResizing);
+}
+let lastWidth = localStorage.getItem("queue_width");
+if(lastWidth)
+	$("#content").style.setProperty("--queue-width", lastWidth);
+
+
+$("#settings").addEventListener("click", function(e){
+	ShowSettings();
 });

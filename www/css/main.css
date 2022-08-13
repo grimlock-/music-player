@@ -1,10 +1,15 @@
-:root {
-	--category-row-height: 45px;
-}
-
 body {
 	margin: 0px;
 	background-color: #aaa;
+}
+
+body.noselect {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .hidden {
@@ -192,4 +197,7 @@ body {
 }
 .player-button.shuffle {
 	background-image: url("../img/arrows-shuffle.svg");
+}
+.player-button.settings {
+	background-image: url("../img/settings.svg");
 }

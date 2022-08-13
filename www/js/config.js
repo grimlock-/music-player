@@ -4,7 +4,6 @@ const defaultSettings =
 	initial_view: "default", //default, restore [previous view]
 	default_view: "timeline",
 	theme: "theme-one",
-	sounds: true,
 	lazy_loading: true,
 	queue: {
 		//Remove songs from queue when they finish playing

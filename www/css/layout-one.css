@@ -5,9 +5,11 @@
     -category content taking up the rest
 */
 .layout-one-grid {
+	--category-row-height: 45px;
+	--queue-width: 300px;
 	display: grid;
 	grid-template-rows: var(--category-row-height) 3fr 1fr;
-	grid-template-columns: 300px 15px 3fr 1fr;
+	grid-template-columns: var(--queue-width) 15px 3fr 382px;
 }
 
 .layout-one-grid #categories {

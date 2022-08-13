@@ -319,7 +319,7 @@ function _nodePlaybackEnded(e)
 	if(State == PlayerState.Paused)
 		return;
 
-	console.log("AudioBufferSourceNode: ended event");
+	console.log("AudioNode (ended)");
 	this.disconnect();
 	if(CurrentNode === this)
 		CurrentNode = null;
@@ -378,7 +378,7 @@ function _nodePlaybackEnded(e)
 }
 function _elementPlaybackEnded(e)
 {
-	console.log("<audio> ended event");
+	console.log("<audio> (ended)");
 	if(CurrentNode)
 		return;
 	if(CurrentlyLoading == CurrentSong && LoadingXhr !== null)
@@ -395,7 +395,7 @@ function _elementPlaybackEnded(e)
 }
 function _elementCanPlay(e)
 {
-	console.log("<audio>: canplay event");
+	console.log("<audio> (canplay)");
 	let id = this.src.substring(this.src.indexOf('=')+1);
 	if(!IsLoaded(id))
 	{

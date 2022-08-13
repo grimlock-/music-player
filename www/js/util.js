@@ -21,6 +21,11 @@ export function RandomInt(max)
 	return Math.floor(Math.random() * max);
 }
 
+export function Clamp(num, min, max)
+{
+	return Math.min(Math.max(min, num), max);
+}
+
 export function StoMS(seconds)
 {
 	if(typeof seconds != "number")
