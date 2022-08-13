@@ -317,7 +317,18 @@ document.getElementById("next").addEventListener("click", function(e){
 	Player.NextSong();
 });
 document.getElementById("stop").addEventListener("click", function(e){
-	Player.Stop();
+	switch(Player.GetState())
+	{
+		case Player.PlayerState.Playing:
+		case Player.PlayerState.Paused:
+		case Player.PlayerState.Loading:
+			Player.Stop();
+		break;
+
+		default:
+			//do nothing
+		break;
+	}
 });
 document.getElementById("loop").addEventListener("click", function(e){
 	switch(Player.Looping)
