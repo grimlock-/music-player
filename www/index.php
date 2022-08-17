@@ -6,6 +6,7 @@
 	<link rel="stylesheet" href="css/main.css" />
 	<link rel="stylesheet" href="css/layout-one.css" />
 	<link rel="stylesheet" href="css/views.css" />
+	<link rel="stylesheet" href="css/settings.css" />
 	<link rel="icon" type="image/x-icon" href="favicon.ico" />
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<link rel="preload" href="img/album.png" as="image" />
@@ -56,7 +57,7 @@
 			<button id="next" class="player-button next"></button>
 			<button id="loop" class="player-button loop-off"></button>
 			<button id="shuffle" class="player-button shuffle"></button>
-			<button id="settings" class="player-button settings"></button>
+			<button id="settings-btn" class="player-button settings"></button>
 			<div id="volume">Vol <input type="range" id="volume_slider" min="0" max="1" value="1" step="any" /></div>
 			<div id="seekbar_stuff"><span id="tracktime">--:--</span> <input type="range" id="seekbar" min="0" max="10" value="0" step="1" /><span id="tracklen">--:--</span></div>
 			<button id="clear">clear queue</button>
@@ -77,7 +78,70 @@
 		</div>
 		<div id="messages" class="hidden"></div>
 	</div>
-	<div id="popup">
+	<div id="settings" class="hidden modal">
+		<div class="background"></div>
+		<div class="content">
+			<button type="button" class="close"></button>
+			<div class="middle">
+				<h3>Configuration</h3>
+				<hr/>
+
+				<h3>Library</h3>
+				<div id="library">
+					<div>Directories</div>
+					<div id="library-directories">
+					<?php
+						require("config.php");
+						$dirs = file_get_contents("directories.txt");
+						if($dirs)
+						{
+							if(stripos($dirs, "\n") !== false)
+							{
+								$dirs = explode("\n", $dirs);
+								foreach($dirs as $dir)
+									echo "<div class=\"library-directory\">$dir</div>";
+							}
+							else
+							{
+								echo "<div class=\"library-directory\">$dirs</div>";
+							}
+						}
+						else
+						{
+							echo "<div class=\"no_directories_notice\">No directories set!</div>";
+						}
+					?>
+					</div>
+					<input type="text" id="library_directory" /><button id="library-add">Add</button><button id="library-remove">Remove</button>
+					<div id="library-notice"></div>
+					<div>
+						<button type="button" id="library-import">Scan Directories</button>
+						<button type="button" id="library-thumbnail">Generate Thumbnails</button>
+					</div>
+					<div id="library-warning"></div>
+					<div id="library-status"></div>
+				</div>
+				<hr/>
+
+				<h3>Info</h3>
+				<div id="song_count">Songs: </div>
+				<div id="video_count">Videos: </div>
+				<div id="album_count">Albums: </div>
+				<div id="artist_count">Artists: </div>
+				<hr/>
+
+				<h3>Dev</h3>
+				<div>Play song</div>
+				<input type="text" id="song-test"/>
+				<button type="button" id="settings-set-audio">Set Song</button>
+				<br/>
+				<audio controls></audio>
+			</div>
+			<div class="bottom">
+				<button type="button" id="settings-reset">Reset</button>
+				<button type="button" id="settings-apply">Apply</button>
+			</div>
+		</div>
 	</div>
 	<template id="timeline_template">
 		<h1>Collection Timeline</h1>

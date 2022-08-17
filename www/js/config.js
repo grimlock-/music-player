@@ -14,11 +14,6 @@ const defaultSettings =
 		show_queue_info: true
 	},
 	playback: {
-		/*fadeout: false,
-		fadeout_duration: 3,
-		crossfade: false,
-		crossfade_fadeout: 1,
-		crossfade_fadein: 1,*/
 		set_title_to_track: true,
 		title_format: "%title% - %artist%",
 		media_session_art_fallback: true
@@ -71,6 +66,9 @@ const defaultSettings =
 	},
 	spotlight: {
 		keep_in_view: true
+	},
+	dev: {
+		show_ids: false
 	}
 };
 const Constraints =

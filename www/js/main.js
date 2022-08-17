@@ -4,6 +4,7 @@ import * as Player from './playback.js';
 import * as Cache from './cache.js';
 import * as Views from './views.js';
 import * as Util from './util.js';
+import * as Settings from './settings.js';
 
 
 //DOM root node for template instance
@@ -376,6 +377,3 @@ if(lastWidth)
 	$("#content").style.setProperty("--queue-width", lastWidth);
 
 
-$("#settings").addEventListener("click", function(e){
-	ShowSettings();
-});

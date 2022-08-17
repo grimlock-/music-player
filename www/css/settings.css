@@ -1,0 +1,56 @@
+.modal {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 5;
+}
+.modal .background {
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.4);
+}
+.modal .content {
+	width: 80%;
+	height: 90%;
+	position: relative;
+	top: -95%;
+	margin: auto;
+	background-color: #abf;
+	overflow: auto;
+}
+
+#settings .close {
+	position: absolute;
+	top: 12px;
+	right: 13px;
+}
+#settings .close:hover {
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+/********
+ Library
+********/
+.directory {
+	color: black;
+}
+.directory_candidate {
+	color: grey;
+}
+.no_directories_notice {
+	background-color: lightblue;
+}
+#import_button.disabled {
+	background-color: #e5e5e5;
+	color: grey;
+}
+#thumbnail_button.disabled {
+	background-color: #e5e5e5;
+	color: grey;
+}
+.warning {
+	background-color: yellow;
+}
+
