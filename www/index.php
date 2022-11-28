@@ -83,12 +83,13 @@
 		<div class="content">
 			<button type="button" class="close"></button>
 			<div class="middle">
-				<h3>Configuration</h3>
-				<hr/>
-
 				<h3>Library</h3>
 				<div id="library">
-					<div>Directories</div>
+					<div id="song_count">Songs: &lt;...&gt;</div>
+					<div id="video_count">Videos: &lt;...&gt;</div>
+					<div id="album_count">Albums: &lt;...&gt;</div>
+					<div id="artist_count">Artists: &lt;...&gt;</div>
+					<div>Directories:</div>
 					<div id="library-directories">
 					<?php
 						require("config.php");
@@ -123,11 +124,8 @@
 				</div>
 				<hr/>
 
-				<h3>Info</h3>
-				<div id="song_count">Songs: </div>
-				<div id="video_count">Videos: </div>
-				<div id="album_count">Albums: </div>
-				<div id="artist_count">Artists: </div>
+				<h3>Configuration</h3>
+					<div id="config"></div>
 				<hr/>
 
 				<h3>Dev</h3>

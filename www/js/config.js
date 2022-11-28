@@ -1,7 +1,7 @@
 const defaultSettings =
 {
 	title: "Moozik",
-	initial_view: "default", //default, restore [previous view]
+	initial_view: "default",
 	default_view: "timeline",
 	theme: "theme-one",
 	lazy_loading: true,
@@ -71,36 +71,53 @@ const defaultSettings =
 		show_ids: false
 	}
 };
+//enums aren't being used, I'm just listing the values here until they're pulled out to their own .js
 const Constraints =
 {
+	initial_view: {
+		type: "enum",
+		o: ["default", "restore"]
+	},
+	default_view: {
+		type: "enum",
+		o: []
+	},
+	theme: {
+		type: "enum",
+		o: ["theme-one"]
+	},
 	views: {
 		timeline: {
+			default_grouping: {
+				type: "enum",
+				o: ["day", "year", "month"]
+			},
 			next_chunk_scroll_percent: {
 				type: "number",
-				minimum: 20,
-				maximum: 100
+				min: 20,
+				max: 100
 			}
 		},
 		random: {
 			default_song_count: {
 				type: "number",
-				minimum: 1
+				min: 1
 			},
 			default_video_count: {
 				type: "number",
-				minimum: 1
+				min: 1
 			},
 			default_album_count: {
 				type: "number",
-				minimum: 1
+				min: 1
 			}
 		}
 	},
 	quicksearch: {
 		max_item_count_per_category: {
 			type: "number",
-			minimum: 1,
-			maximum: 20
+			min: 1,
+			max: 20
 		}
 	}
 };
@@ -110,6 +127,10 @@ export function Init()
 {
 	if(!LoadFromStorage())
 		settings = JSON.parse(JSON.stringify(defaultSettings));
+
+	RenderMarkup(settings, document.getElementById("config"), "");
+
+	//TODO - add help icon for window title format during playback
 }
 export function LoadFromStorage()
 {
@@ -121,6 +142,91 @@ export function LoadFromStorage()
 		return true;
 	}
 	return false;
+}
+
+let headerLevel = 3;
+function RenderMarkup(obj, container, settingsPath)
+{
+	if(settingsPath.length > 0 && settingsPath != "views")
+	{
+		let header = document.createElement("h"+headerLevel);
+		header.innerHTML = settingsPath.substring(settingsPath.lastIndexOf(".")+1);
+		container.appendChild(header);
+	}
+	for(let prop in obj)
+	{
+		let div = document.createElement("div");
+		div.id = "config_" + prop;
+		switch(typeof obj[prop])
+		{
+			case "string":
+				div.innerHTML = StringMarkup(prop, obj[prop], settingsPath + prop);
+			break;
+
+			case "number":
+				div.innerHTML = NumberMarkup(prop, obj[prop], settingsPath + prop);
+			break;
+
+			case "boolean":
+				div.innerHTML = BoolMarkup(prop, obj[prop], settingsPath + prop);
+			break;
+
+			case "object":
+				container.appendChild(document.createElement("br"));
+				let newPath = (settingsPath.length > 0 ? settingsPath + "." + prop : prop);
+				headerLevel++;
+				RenderMarkup(obj[prop], div, newPath);
+			break;
+
+			default:
+			break;
+		}
+		container.appendChild(div);
+	}
+	headerLevel--;
+}
+function StringMarkup(label, placeholder, settingsPath)
+{
+	let c = GetConstraints(settingsPath);
+	/*if(c && c.type == "enum")
+		return EnumMarkup(label, placeholder, settingsPath);*/
+
+	let ret = label.replaceAll("_", " ") + ": ";
+	ret += "<input type=\"text\" placeholder=\"" + placeholder + "\" name=\"" + settingsPath + "\" />";
+	return ret;
+}
+function EnumMarkup(label, defaultValue, settingsPath)
+{
+	return "ENUM (" + settingsPath + ")";
+}
+function NumberMarkup(label, placeholder, settingsPath)
+{
+	let c = GetConstraints(settingsPath);
+	let ret = label.replaceAll("_", " ") + ": ";
+	ret += "<input type=\"number\" placeholder=\"" + placeholder + "\" name=\"" + settingsPath + "\" ";
+	if(c)
+	{
+		if(c.min)
+			ret += "min=\"" + c.min + "\" ";
+		if(c.max)
+			ret += "max=\"" + c.max + "\" ";
+	}
+	ret += "/>";
+	return ret;
+}
+function BoolMarkup(label, defaultValue, settingsPath)
+{
+	let ret = label.replaceAll("_", " ") + ": ";
+	ret += "<input type=\"radio\" name=\"" + settingsPath + "\" value=\"true\"";
+	if(defaultValue)
+		ret += " checked";
+	ret += " ><label for=\"" + settingsPath + "\">True</label>";
+
+	ret += "<input type=\"radio\" name=\"" + settingsPath + "\" value=\"false\"";
+	if(!defaultValue)
+		ret += " checked";
+	ret += " ><label for=\"" + settingsPath + "\">False</label>";
+	return ret;
 }
 
 export function AddMissingFields(ref, current)
@@ -191,3 +297,18 @@ export function Get(str)
 	else
 		return val;
 }
+
+function GetConstraints(path)
+{
+	let ret = null;
+	let obj = Constraints;
+	for(let key of path.split('.'))
+	{
+		if(obj.hasOwnProperty(key))
+			obj = obj[key];
+		else
+			return null;
+	}
+	return null;
+}
+

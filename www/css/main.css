@@ -165,6 +165,9 @@ body.noselect {
 	overflow: auto;
 }
 
+.player-button:hover {
+	cursor: pointer;
+}
 .player-button.play {
 	background-image: url("../img/player-play.svg");
 }
