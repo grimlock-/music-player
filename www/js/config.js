@@ -71,7 +71,7 @@ const defaultSettings =
 		show_ids: false
 	}
 };
-//enums aren't being used, I'm just listing the values here until they're pulled out to their own .js
+//enums aren't currently being used, I'm just listing the values here until they're pulled out to their own .js
 const Constraints =
 {
 	initial_view: {
@@ -96,6 +96,24 @@ const Constraints =
 				type: "number",
 				min: 20,
 				max: 100
+			}
+		},
+		artists: {
+			separate_the_bucket: {
+				label: "separate \"the\" bucket",
+				description: "Separate items starting with \"the\" into their own bucket"
+			},
+			allow_initial_punctuation: {
+				description: "When getting all items for a bucket, include items that have punctuation before the given character"
+			}
+		},
+		albums: {
+			separate_the_bucket: {
+				label: "separate \"the\" bucket",
+				description: "Separate items starting with \"the\" into their own bucket"
+			},
+			allow_initial_punctuation: {
+				description: "When getting all items for a bucket, include items that have punctuation before the given character"
 			}
 		},
 		random: {
@@ -154,22 +172,31 @@ function RenderMarkup(obj, container, settingsPath)
 		header.innerHTML = t[0].toUpperCase() + t.substring(1);
 		container.appendChild(header);
 	}
+
 	for(let prop in obj)
 	{
+		let fullPath = (settingsPath.length == 0 ? "" : settingsPath+".") + prop;
+		let c = GetConstraints(fullPath);
+		let label = prop;
+		if(c && c.label)
+			label = c.label;
 		let div = document.createElement("div");
 		div.id = "config_" + prop;
 		switch(typeof obj[prop])
 		{
 			case "string":
-				div.innerHTML = StringMarkup(prop, obj[prop], settingsPath + prop);
+				if(c && c.type == "enum")
+					div.innerHTML = EnumMarkup(label, obj[prop], fullPath, c);
+				else
+					div.innerHTML = StringMarkup(label, obj[prop], fullPath, c);
 			break;
 
 			case "number":
-				div.innerHTML = NumberMarkup(prop, obj[prop], settingsPath + prop);
+				div.innerHTML = NumberMarkup(label, obj[prop], fullPath, c);
 			break;
 
 			case "boolean":
-				div.innerHTML = BoolMarkup(prop, obj[prop], settingsPath + prop);
+				div.innerHTML = BoolMarkup(label, obj[prop], fullPath, c);
 			break;
 
 			case "object":
@@ -186,36 +213,31 @@ function RenderMarkup(obj, container, settingsPath)
 	}
 	headerLevel--;
 }
-function StringMarkup(label, placeholder, settingsPath)
+function StringMarkup(label, placeholder, settingsPath, constraints)
 {
-	let c = GetConstraints(settingsPath);
-	/*if(c && c.type == "enum")
-		return EnumMarkup(label, placeholder, settingsPath);*/
-
 	let ret = label.replaceAll("_", " ") + ": ";
 	ret += "<input type=\"text\" placeholder=\"" + placeholder + "\" name=\"" + settingsPath + "\" />";
 	return ret;
 }
-function EnumMarkup(label, defaultValue, settingsPath)
+function EnumMarkup(label, defaultValue, settingsPath, constraints)
 {
-	return "ENUM (" + settingsPath + ")";
+	return "ENUM (<code>" + settingsPath + "</code>)";
 }
-function NumberMarkup(label, placeholder, settingsPath)
+function NumberMarkup(label, placeholder, settingsPath, constraints)
 {
-	let c = GetConstraints(settingsPath);
 	let ret = label.replaceAll("_", " ") + ": ";
 	ret += "<input type=\"number\" placeholder=\"" + placeholder + "\" name=\"" + settingsPath + "\" ";
-	if(c)
+	if(constraints)
 	{
-		if(c.min)
-			ret += "min=\"" + c.min + "\" ";
-		if(c.max)
-			ret += "max=\"" + c.max + "\" ";
+		if(constraints.min)
+			ret += "min=\"" + constraints.min + "\" ";
+		if(constraints.max)
+			ret += "max=\"" + constraints.max + "\" ";
 	}
 	ret += "/>";
 	return ret;
 }
-function BoolMarkup(label, defaultValue, settingsPath)
+function BoolMarkup(label, defaultValue, settingsPath, constraints)
 {
 	let ret = label.replaceAll("_", " ") + ": ";
 	ret += "<input type=\"radio\" name=\"" + settingsPath + "\" value=\"true\"";
@@ -301,7 +323,6 @@ export function Get(str)
 
 function GetConstraints(path)
 {
-	let ret = null;
 	let obj = Constraints;
 	for(let key of path.split('.'))
 	{
@@ -310,6 +331,8 @@ function GetConstraints(path)
 		else
 			return null;
 	}
-	return null;
+	if(obj === Constraints)
+		return null;
+	return obj;
 }
 
