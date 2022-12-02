@@ -215,11 +215,20 @@ function _addSong()
 		Queue.AddSong(this.dataset.songid);
 }
 let spotlight_element = null;
-function _showCollection(e)
+function _collectionClick(e)
 {
 	if(spotlight_element === this)
-		return;
-	spotlight_element = this;
+	{
+		HideCollection();
+	}
+	else
+	{
+		spotlight_element = this;
+		ShowCollection();
+	}
+}
+function ShowCollection(e)
+{
 	let root = GetCollectionRoot(spotlight_element);
 	let spot = document.getElementById("collection_spotlight");
 	let container = document.getElementById("collection_items");
@@ -280,7 +289,7 @@ function _showCollection(e)
 		//TODO - set class on spotlight making stuff right aligned
 	}
 }
-function _hideCollection(e)
+function HideCollection(e)
 {
 	document.getElementById("collection_spotlight").classList.add("hidden");
 	spotlight_element = null;
@@ -328,7 +337,7 @@ function _downloadCollection(e)
 	ele.click();
 	return false;
 }
-document.getElementById("collection_spotlight").querySelector(".close").addEventListener("click", _hideCollection);
+document.getElementById("collection_spotlight").querySelector(".close").addEventListener("click", HideCollection);
 document.getElementById("collection_spotlight").querySelector(".download").addEventListener("click", _downloadCollection);
 document.getElementById("main_panel").addEventListener("scroll", UpdateSpotlightPosition);
 
@@ -354,7 +363,7 @@ function MakeAlbumTile(album)
 	let i = make("img");
 	i.classList.add("cover");
 	i.addEventListener("error", _albumArtError);
-	i.addEventListener("click", _showCollection);
+	i.addEventListener("click", _collectionClick);
 	i.setAttribute("width", 200);
 	i.setAttribute("height", 200);
 	if(Config.Get("lazy_loading"))
@@ -569,7 +578,7 @@ let Timeline = {
 					newNode.onmouseleave = _albumMouseleave;
 					let i = make("img");
 					i.classList.add("cover");
-					i.addEventListener("click", _showCollection);
+					i.addEventListener("click", _collectionClick);
 					i.setAttribute("width", 200);
 					i.setAttribute("height", 200);
 					if(Config.Get("lazy_loading"))
@@ -920,7 +929,7 @@ let Albums = {
 		{
 			//let albumDiv = make("div");
 			let albumDiv = MakeAlbumTile(album);
-			$(albumDiv, "img").removeEventListener("click", _showCollection);
+			$(albumDiv, "img").removeEventListener("click", _collectionClick);
 			$(albumDiv, "img").addEventListener("click", this._albumClick);
 			//albumDiv.dataset.albumid = album.id;
 			albumDiv.classList.add("tile_med", "collection");
