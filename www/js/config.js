@@ -150,7 +150,8 @@ function RenderMarkup(obj, container, settingsPath)
 	if(settingsPath.length > 0 && settingsPath != "views")
 	{
 		let header = document.createElement("h"+headerLevel);
-		header.innerHTML = settingsPath.substring(settingsPath.lastIndexOf(".")+1);
+		let t = settingsPath.substring(settingsPath.lastIndexOf(".")+1);
+		header.innerHTML = t[0].toUpperCase() + t.substring(1);
 		container.appendChild(header);
 	}
 	for(let prop in obj)
