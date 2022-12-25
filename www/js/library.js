@@ -15,21 +15,25 @@ function set_notice(notice)
 function disable_import_button()
 {
 	import_btn.removeEventListener("click", start_import);
+	import_btn.disabled = true;
 	import_btn.classList.add("disabled");
 }
 function enable_import_button()
 {
 	import_btn.addEventListener("click", start_import);
+	import_btn.disabled = false;
 	import_btn.classList.remove("disabled");
 }
 function disable_thumbnail_button()
 {
 	thumbnail_btn.removeEventListener("click", start_thumbs);
+	thumbnail_btn.disabled = true;
 	thumbnail_btn.classList.add("disabled");
 }
 function enable_thumbnail_button()
 {
 	thumbnail_btn.addEventListener("click", start_thumbs);
+	thumbnail_btn.disabled = false;
 	thumbnail_btn.classList.remove("disabled");
 }
 export function request_import_status()

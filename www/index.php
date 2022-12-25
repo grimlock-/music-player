@@ -222,7 +222,7 @@
 	</template>
 	<template id="lyric_template">
 		<h1>Song lyric viewer, maybe have an API endpoint?</h1>
-	</template>"
+	</template>
 	<template id="video_viewer_template">
 		<h1>Video Viewer</h1>
 		<video>

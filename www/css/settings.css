@@ -33,22 +33,11 @@
 /********
  Library
 ********/
-.directory {
-	color: black;
-}
 .directory_candidate {
 	color: grey;
 }
 .no_directories_notice {
 	background-color: lightblue;
-}
-#import_button.disabled {
-	background-color: #e5e5e5;
-	color: grey;
-}
-#thumbnail_button.disabled {
-	background-color: #e5e5e5;
-	color: grey;
 }
 .warning {
 	background-color: yellow;
