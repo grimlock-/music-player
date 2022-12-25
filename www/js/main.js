@@ -5,6 +5,7 @@ import * as Cache from './cache.js';
 import * as Views from './views.js';
 import * as Util from './util.js';
 import * as Settings from './settings.js';
+import * as Enums from './enums.js';
 
 
 //DOM root node for template instance
@@ -106,7 +107,7 @@ QuickSearch = document.getElementById("quicksearch");
 QuickSearchResults = document.getElementById("quicksearch_results");
 PlayPause = document.getElementById("playpause");
 
-if(Config.Get("initial_view") === "default")
+if(Config.Get("initial_view") == Enums.InitialView.DEFAULT)
 {
 	SetView(Config.Get("default_view"));
 }

@@ -3,17 +3,17 @@ let InitialView = {
 }
 InitialView.DEFAULT = "default";
 let Views = {
-	TIMELINE: "views.timeline",
-	ARTISTS: "views.artists",
-	ARTIST: "views.artist",
-	ALBUMS: "views.albums",
-	SONGS: "views.songs",
-	GENRES: "views.genres",
-	REAL_TIMELINE: "views.real_timeline",
-	FAVORITES: "views.favorites",
-	RANDOM: "views.random",
-	PLAYLISTS: "views.playlists",
-	VIDEOS: "views.videos"
+	TIMELINE: "timeline",
+	ARTISTS: "artists",
+	ARTIST: "artist",
+	ALBUMS: "albums",
+	SONGS: "songs",
+	GENRES: "genres",
+	REAL_TIMELINE: "real_timeline",
+	FAVORITES: "favorites",
+	RANDOM: "random",
+	PLAYLISTS: "playlists",
+	VIDEOS: "videos"
 }
 let Layouts = {
 	LAYOUTONE: "layouts.one"
@@ -32,4 +32,4 @@ let QuicksearchResultTypes = {
 	ALBUMS: "albums",
 	ARTISTS: "artists"
 }
-export { InitialView, Views, Layouts, GroupBy, QuicksearchResultTypes };
+export { InitialView, Views, Layouts, Themes, GroupBy, QuicksearchResultTypes };

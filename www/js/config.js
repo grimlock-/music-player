@@ -4,8 +4,8 @@ const defaultSettings =
 {
 	title: "Moozik",
 	initial_view: "default",
-	default_view: "timeline",
-	theme: "theme-one",
+	default_view: "views.timeline",
+	theme: "themes.one",
 	lazy_loading: true,
 	queue: {
 		//Remove songs from queue when they finish playing
@@ -72,7 +72,6 @@ const defaultSettings =
 		show_ids: false
 	}
 };
-//enums aren't currently being used, I'm just listing the values here until they're pulled out to their own .js
 const Constraints =
 {
 	initial_view: {
@@ -85,7 +84,7 @@ const Constraints =
 	},
 	theme: {
 		type: "enum",
-		o: ["theme-one"]
+		o: Enums.Themes
 	},
 	playback: {
 		title_format: {
@@ -233,7 +232,12 @@ function StringMarkup(label, placeholder, settingsPath, constraints)
 }
 function EnumMarkup(label, defaultValue, settingsPath, constraints)
 {
-	return "ENUM (<code>" + settingsPath + "</code>)";
+	let ret = label.replaceAll("_", " ") + ": <select name=\"" + settingsPath + "\">";
+	for(let option of Object.keys(constraints.o))
+	{
+		ret += "<option value=\"" + option + "\">" + option + "</option>";
+	}
+	return ret;
 }
 function NumberMarkup(label, placeholder, settingsPath, constraints)
 {

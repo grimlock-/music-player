@@ -28,6 +28,7 @@ import * as Cache from './cache.js';
 import * as Config from './config.js';
 import * as Queue from './queue.js';
 import * as Util from './util.js';
+import * as Enums from './enums.js';
 
 let Instance = document.getElementById("instance");
 let Months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -35,27 +36,27 @@ let Views = [];
 
 export function Get(name)
 {
-	switch(name.toLowerCase())
+	switch(name)
 	{
-		case "artists":
+		case Enums.Views.ARTISTS:
 			return Artists;
-		case "artist":
+		case Enums.Views.ARTIST:
 			return Artist;
-		case "albums":
+		case Enums.Views.ALBUMS:
 			return Albums;
-		case "songs":
+		case Enums.Views.SONGS:
 			return Songs;
-		case "genres":
+		case Enums.Views.GENRES:
 			return Genres;
-		case "real_timeline":
+		case Enums.Views.REAL_TIMELINE:
 			return RealTimeline;
-		case "favorites":
+		case Enums.Views.FAVORITES:
 			return Favorites;
-		case "random":
+		case Enums.Views.RANDOM:
 			return Random;
-		case "playlists":
+		case Enums.Views.PLAYLISTS:
 			return Playlists;
-		case "videos":
+		case Enums.Views.VIDEOS:
 			return Videos;
 
 		default:
@@ -428,12 +429,12 @@ let Timeline = {
 		$(Instance, "#large").addEventListener("click", this.SetSize.bind(this, "large"));
 		$(Instance, "#medium").addEventListener("click", this.SetSize.bind(this, "medium"));
 		$(Instance, "#small").addEventListener("click", this.SetSize.bind(this, "small"));
-		this.SetMode(this.mode || Config.Get("views.timeline.default_grouping") || "day");
+		this.SetMode(this.mode || Config.Get("views.timeline.default_grouping") || Enums.GroupBy.DAY);
 		//this.Apply(this.songs);
 		this.SetSize(this.size || "medium");
 		if(this.lastScrollPosition > 0)
 			Instance.scrollTo(0, this.lastScrollPosition);
-		if(Config.Get("theme") == "theme-one")
+		if(Config.Get("theme") == Enums.Themes.THEMEONE)
 			$("#main_panel").addEventListener("scroll", this._scrollDelegate);
 	},
 	Apply: function(data) {
@@ -441,13 +442,13 @@ let Timeline = {
 		let container = document.getElementById("items");
 		switch(this.mode)
 		{
-			case "day":
+			case Enums.GroupBy.DAY:
 				groups = Util.GroupSongsByDate(data);
 			break;
-			case "year":
+			case Enums.GroupBy.YEAR:
 				groups = Util.GroupSongsByYear(data);
 			break;
-			case "month":
+			case Enums.GroupBy.MONTH:
 				groups = Util.GroupSongsByMonth(data);
 			break;
 		}
@@ -478,17 +479,17 @@ let Timeline = {
 				let id;
 				switch(this.mode)
 				{
-					case "day":
+					case Enums.GroupBy.DAY:
 						id = "_"+date;
 						innerWrapper = null;
 						header.innerHTML = Months[d.getUTCMonth()] + " " + d.getUTCDate() + ", " + d.getUTCFullYear();
 					break;
-					case "year":
+					case Enums.GroupBy.YEAR:
 						id = d.getUTCFullYear();
 						innerWrapper = $(container, "#_"+id);
 						header.innerHTML = d.getUTCFullYear();
 					break;
-					case "month":
+					case Enums.GroupBy.MONTH:
 						id = d.getUTCFullYear() + "-" + d.getUTCMonth();
 						innerWrapper = $(container, "#_"+id);
 						header.innerHTML = Months[d.getUTCMonth()] + " " + d.getUTCFullYear();
@@ -691,9 +692,9 @@ let Timeline = {
 	SetMode: function(mode) {
 		switch(mode)
 		{
-			case "day":
-			case "year":
-			case "month":
+			case Enums.GroupBy.DAY:
+			case Enums.GroupBy.MONTH:
+			case Enums.GroupBy.YEAR:
 				this.mode = mode;
 			break;
 		}
