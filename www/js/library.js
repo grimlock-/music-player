@@ -137,6 +137,10 @@ function _remove_directory_callback()
 function start_import()
 {
 	disable_import_button();
+	$("#song_count").innerHTML = "Songs: &lt;...&gt;";
+	$("#video_count").innerHTML = "Videos: &lt;...&gt";
+	$("#album_count").innerHTML = "Albums: &lt;...&gt";
+	$("#artist_count").innerHTML = "Artists: &lt;...&gt";
 	set_notice("Starting import");
 	setTimeout(() => set_notice(""), 2000);
 
@@ -172,6 +176,7 @@ function _import_status_callback()
 		import_running = false;
 		enable_import_button();
 		$(Container, "#library-status").innerText = "";
+		get_info();
 	}
 	else
 	{
@@ -267,3 +272,22 @@ function _thumbs_status_callback()
 	}
 }
 
+function _library_info_callback(e)
+{
+	let result = JSON.parse(this.responseText);
+	if(result.songs)
+		$("#song_count").innerHTML = "Songs: " + result.songs;
+	if(result.videos)
+		$("#video_count").innerHTML = "Videos: " + result.videos;
+	if(result.albums)
+		$("#album_count").innerHTML = "Albums: " + result.albums;
+	if(result.artists)
+		$("#artist_count").innerHTML = "Artists: " + result.artists;
+}
+export function get_info()
+{
+	let xhr = new XMLHttpRequest();
+	xhr.addEventListener("load", _library_info_callback);
+	xhr.open("GET", location.href.substring(0, location.href.lastIndexOf("/")+1)+"api/library_info.php");
+	xhr.send();
+}

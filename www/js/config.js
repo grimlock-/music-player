@@ -1,3 +1,5 @@
+import * as Enums from './enums.js';
+
 const defaultSettings =
 {
 	title: "Moozik",
@@ -15,8 +17,7 @@ const defaultSettings =
 	},
 	playback: {
 		set_title_to_track: true,
-		title_format: "%title% - %artist%",
-		media_session_art_fallback: true
+		title_format: "%title% - %artist%"
 	},
 	cache: {
 		//Number of items in the queue past whatever is currently playing to load to allow gapless playback
@@ -76,25 +77,30 @@ const Constraints =
 {
 	initial_view: {
 		type: "enum",
-		o: ["default", "restore"]
+		o: Enums.InitialView
 	},
 	default_view: {
 		type: "enum",
-		o: []
+		o: Enums.Views
 	},
 	theme: {
 		type: "enum",
 		o: ["theme-one"]
 	},
+	playback: {
+		title_format: {
+			description: "%title% = track title\n%artist% = artist name"
+		}
+	},
 	views: {
 		timeline: {
 			default_grouping: {
 				type: "enum",
-				o: ["day", "year", "month"]
+				o: Enums.GroupBy
 			},
 			next_chunk_scroll_percent: {
 				type: "number",
-				min: 20,
+				min: 10,
 				max: 100
 			}
 		},
@@ -132,6 +138,10 @@ const Constraints =
 		}
 	},
 	quicksearch: {
+		type_order: {
+			type: "array",
+			base: Enums.QuicksearchResultTypes
+		},
 		max_item_count_per_category: {
 			type: "number",
 			min: 1,
@@ -148,7 +158,7 @@ export function Init()
 
 	RenderMarkup(settings, document.getElementById("config"), "");
 
-	//TODO - add help icon for window title format during playback
+	//TODO - add descriptions and tooltips
 }
 export function LoadFromStorage()
 {
@@ -187,6 +197,8 @@ function RenderMarkup(obj, container, settingsPath)
 			case "string":
 				if(c && c.type == "enum")
 					div.innerHTML = EnumMarkup(label, obj[prop], fullPath, c);
+				else if(c && c.type == "array")
+					div.innerHTML = ArrayMarkup(label, obj[prop], fullPath, c);
 				else
 					div.innerHTML = StringMarkup(label, obj[prop], fullPath, c);
 			break;
@@ -249,6 +261,15 @@ function BoolMarkup(label, defaultValue, settingsPath, constraints)
 	if(!defaultValue)
 		ret += " checked";
 	ret += " ><label for=\"" + settingsPath + "\">False</label>";
+	return ret;
+}
+function ArrayMarkup(label, defaultValue, settingsPath, constraints)
+{
+	let ret = "ARRAY(<code>" + settingsPath + "</code>): " + Object.keys(constraints.base).length + " keys - ";
+	for(let key of Object.keys(constraints.base))
+	{
+		ret += key + ",";
+	}
 	return ret;
 }
 

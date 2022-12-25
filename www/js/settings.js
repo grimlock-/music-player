@@ -28,7 +28,7 @@ export function Show()
 	$("#settings .background").addEventListener("click", _bgClick);
 	$("#settings .close").addEventListener("click", _bgClick);
 	Container.classList.remove("hidden");
-
+	Library.get_info();
 	Library.request_import_status();
 	Library.request_thumbs_status();
 }
