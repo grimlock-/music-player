@@ -24,8 +24,6 @@ Transcoding is not supported. Files are sent to clients as-is
 
 Directories (and children) containing a .nomedia file are ignored
 
-You will need to download getID3 yourself and place the files in a 'getid3' directory alongside the files from this repository
-
 In Windows, the library scan/import and thumbnail generation scripts must be manually executed. The scripts must be passed the directories.txt file created by library.php for the ``-f/--directories-file`` argument, which must follow the ``--`` argument so the PHP binary won't treat it as its own argument
 
 ## Dependencies:
@@ -39,6 +37,9 @@ In Windows, the library scan/import and thumbnail generation scripts must be man
     * Only tested with MariaDB v15.1, might not work with others
 
 ## Installation and Setup
+  * Clone repo and getID3 submodule
+    * ``git clone --recurse-submodules`` or
+    * ``git submodule update --init`` after regular clone
   * Set up database accounts and permissions
   * Open ``install.html`` in browser and fill out information
     * To use the ``reinstall`` option the DB user account must have DROP and CREATE permissions

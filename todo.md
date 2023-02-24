@@ -1,7 +1,7 @@
 ## Feature wishlist
 Views
 * (finish) artist list
-* artist view
+* (finish) artist view
 * real-world timeline
 * genre tree
 * favorites
@@ -27,6 +27,3 @@ Save static playlists as both simple ID lists and as traditional filepath sets i
 
 Some kind of radio mode allowing you to shuffle through songs grouped by genre, artist or tags
 
-## Other
-* Should probably make a shell script to download getID3 and copy files from repo to the directory it'll be hosted out of
-* I wonder if I could also make database initialization a part of that script. Not sure how the enums will interfere with that.
