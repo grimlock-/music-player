@@ -2,7 +2,6 @@ art/
 thumbnails/
 log/
 playlists/
-getid3/
 directories.txt
 *.swp
 *.vim
