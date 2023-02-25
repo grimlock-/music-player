@@ -209,6 +209,6 @@
 	<script>setTimeout(function(){document.querySelector("span").innerText = 3}, 1000)</script>
 	<script>setTimeout(function(){document.querySelector("span").innerText = 2}, 2000)</script>
 	<script>setTimeout(function(){document.querySelector("span").innerText = 1}, 3000)</script>
-	<script>setTimeout(function(){location.href="library.php"}, 4000)</script>
+	<script>setTimeout(function(){location.href="index.php"}, 4000)</script>
 </body>
 </html>
