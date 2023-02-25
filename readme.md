@@ -40,10 +40,11 @@ In Windows, the library scan/import and thumbnail generation scripts must be man
   * Clone repo and getID3 submodule
     * ``git clone --recurse-submodules`` or
     * ``git submodule update --init`` after regular clone
+  * Copy the contents of ``www`` and the ``getid3/getid3`` folder to your site directory
   * Set up database accounts and permissions
   * Open ``install.html`` in browser and fill out information
-    * To use the ``reinstall`` option the DB user account must have DROP and CREATE permissions
-  * After being redirected to ``library.php``, add all directories containing media you want to import
+    * To use the ``reinstall`` option, the DB user account must have DROP and CREATE permissions
+  * After being redirected, click the settings icon and add all directories containing media you want to import
   * Begin import by clicking the ``Import`` button
     * In Windows you must execute the script manually
   * When the buttons are re-enabled click the ``Generate Thumbnails`` button
