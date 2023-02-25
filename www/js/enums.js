@@ -1,4 +1,5 @@
 let InitialView = {
+	DEFULAT: "default",
 	RESTORE: "restore"
 }
 InitialView.DEFAULT = "default";

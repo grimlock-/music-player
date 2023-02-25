@@ -30,6 +30,8 @@
 		if(confirm("User agent looks like a phone browser. Go to mobile page?"))
 			location.href = "mobile.html";
 	}
+
+	const API = location.href.substring(0, location.href.indexOf('#')) + "api/";
 	</script>
 	<script type="module" src="js/main.js"></script>
 </head>

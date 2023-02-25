@@ -3,9 +3,9 @@ import * as Enums from './enums.js';
 const defaultSettings =
 {
 	title: "Moozik",
-	initial_view: "default",
-	default_view: "views.timeline",
-	theme: "themes.one",
+	initial_view: Enums.InitialView.DEFAULT,
+	default_view: Enums.Views.TIMELINE,
+	theme: Enums.Themes.THEMEONE,
 	lazy_loading: true,
 	queue: {
 		//Remove songs from queue when they finish playing
@@ -30,7 +30,7 @@ const defaultSettings =
 	},
 	views: {
 		timeline: {
-			default_grouping: "month",
+			default_grouping: Enums.GroupBy.MONTH,
 			next_chunk_scroll_percent: 80,
 			//When true, songs with no import date show up at the end of the timeline
 			show_songs_with_no_date: false

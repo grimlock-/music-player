@@ -1,3 +1,10 @@
+import * as Config from './config.js';
+import * as Cache from './cache.js';
+import * as Spotlight from './spotlight.js';
+import * as Queue from './queue.js';
+
+export let Months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
 export function DisplayError(message)
 {
 	let ele = document.getElementById("messages");
@@ -13,6 +20,26 @@ export function DisplayError(message)
 		if(!ele.childCount)
 			ele.classList.add("hidden");
 	}, 5000);
+}
+
+export function XhrErrorCheck(response, errMsg1 = "", errMsg2 = "")
+{
+	if(response.status != 200)
+	{
+		if(errMsg1)
+			Util.DisplayError(errMsg1);
+		return null;
+	}
+	
+	let obj = JSON.parse(response.responseText);
+	if(obj.error_message)
+	{
+		if(errMsg2)
+			Util.DisplayError(errMsg2 + obj.error_message);
+		return null;
+	}
+
+	return obj;
 }
 
 export function RandomInt(max)
@@ -276,4 +303,220 @@ export function RenderMarkdown(string, container)
 		}
 	}
 	container.appendChild(ele);
+}
+function _albumMouseenter(e)
+{
+	let btn = $(this, ".add");
+	if(btn)
+		btn.classList.remove("hidden");
+	btn = $(this, "a");
+	if(btn)
+		btn.classList.remove("hidden");
+}
+function _albumMouseleave(e)
+{
+	let btn = $(this, ".add");
+	if(btn)
+		btn.classList.add("hidden");
+	btn = $(this, "a");
+	if(btn)
+		btn.classList.add("hidden");
+}
+function _albumArtError(error)
+{
+	let albumUrl = location.href + "img/album.png";
+	if(this.src != albumUrl)
+		this.src = albumUrl;
+}
+export function MakeAlbumTile(album)
+{
+	let albumDiv = make("div");
+	albumDiv.dataset.albumid = album.id;
+	if(album.title.indexOf(";") == -1)
+	{
+		albumDiv.dataset.title = album.title;
+	}
+	else
+	{
+		albumDiv.dataset.title = album.title.substring(0, album.title.indexOf(";"));
+		albumDiv.dataset.aliases = album.title.substring(album.title.indexOf(";")+1);
+	}
+	let albumInner = make("div");
+	albumInner.style.position = "relative";
+	albumInner.style.height = "auto";
+	albumInner.innerHTML = "<input type=\"image\" src=\"img/plus.svg\" width=\"40px\" height=\"40px\" alt=\"Add album to queue\" class=\"add hidden\" /><a href=\"" + location.href + album_art_path + album.id + "." + thumbnail_format + "\" target=\"_blank\" class=\"albumImageLink hidden\"><img src=\"img/external-link.svg\" width=\"25px\" height=\"25px\"></a>";
+	albumDiv.onmouseenter = _albumMouseenter;
+	albumDiv.onmouseleave = _albumMouseleave;
+	let i = make("img");
+	i.classList.add("cover");
+	i.addEventListener("error", _albumArtError);
+	i.addEventListener("click", Spotlight._collectionClick);
+	i.setAttribute("width", 200);
+	i.setAttribute("height", 200);
+	if(Config.Get("lazy_loading"))
+		i.loading = "lazy";
+	i.setAttribute("src", location.href + album_thumbnail_path + album.id + "_400." + thumbnail_format);
+	i.setAttribute("alt", album.title);
+	albumInner.appendChild(i);
+	albumDiv.appendChild(albumInner);
+
+	if(album.songs)
+	{
+		let songs = make("div")
+		songs.classList.add("hidden");
+		for(let t of album.songs)
+		{
+			if(!Cache.GetSongInfo(t.id))
+				Cache.SetSongInfo(t.id, t);
+			let newEle = make("span");
+			newEle.dataset.songid = t.id;
+			newEle.innerHTML = t.title;
+			songs.appendChild(newEle);
+		}
+		albumDiv.appendChild(songs);
+	}
+
+	return albumDiv;
+}
+export function _appendCollection(e)
+{
+	e.preventDefault();
+	let tracks = [];
+	let root = GetCollectionRoot(this);
+	if(!root)
+	{
+		Util.DisplayError("Error finding collection root");
+		return;
+	}
+	for(let ele of $$(root, "*[data-songid]"))
+	{
+		tracks.push(ele.dataset.songid);
+	}
+	if(tracks.length > 0)
+	{
+		Queue.AddSongs(...tracks);
+	}
+}
+export function _addSong()
+{
+	if(Config.Get("queue.always_append") === true || Queue.IndexOf(this.dataset.songid) == -1)
+		Queue.AddSong(this.dataset.songid);
+}
+
+function GenerateLetterBuckets(buckets, container)
+{
+	let numFlag = false;
+	let specialFlag = false;
+	for(let l of buckets)
+	{
+		let elementText = l;
+		let asNum = Number(l);
+		if(Number.isNaN(asNum))
+		{
+			if(Util.IsSpecialChar(l))
+			{
+				if(specialFlag)
+					continue;
+
+				specialFlag = true;
+				elementText = "@";
+			}
+		}
+		else
+		{
+			if(numFlag)
+				continue;
+
+			numFlag = true;
+			elementText = "#";
+		}
+		let b = make("button", elementText);
+		b.addEventListener("click", this.GetBucketData.bind(this));
+		if(elementText == "#")
+		{
+			if(container.firstChild)
+				container.insertBefore(b, container.firstChild);
+			else
+				container.appendChild(b);
+		}
+		else if(elementText == "@")
+		{
+			if(container.firstChild)
+			{
+				if(container.firstChild.innerHTML == "#")
+					container.insertBefore(b, container.firstChild.nextSibling);
+				else
+					container.insertBefore(b, container.firstChild);
+			}
+			else
+			{
+				container.appendChild(b);
+			}
+		}
+		else if(elementText == "The")
+		{
+			let lastPrior = null;
+			for(let i = container.children.length-1; i >= 0; --i)
+			{
+				let comp = elementText.localeCompare(container.children[i].innerHTML);
+				if(comp < 0)
+					lastPrior = container.children[i];
+				else if(comp > 0)
+					break;
+			}
+			if(lastPrior == null)
+				container.appendChild(b);
+			else
+				container.insertBefore(b, lastPrior);
+		}
+		else
+		{
+			container.appendChild(b);
+		}
+	}
+}
+
+export function GetCollectionRoot(ele)
+{
+	let ret = ele;
+	while(ret != document.body)
+	{
+		if(ret.classList.contains("collection"))
+			return ret;
+		if(ret.id == "collection_spotlight")
+			return ret;
+		ret = ret.parentElement;
+	}
+	return null;
+}
+
+export function _downloadCollection(e)
+{
+	let ids = [];
+	let root = GetCollectionRoot(this);
+	for(let ele of $$(root, "*[data-songid]"))
+	{
+		ids.push(ele.dataset.songid);
+	}
+
+	let title = $(root, "*[data-title]");
+	if(title)
+	{
+		title = title.dataset.title;
+	}
+	else
+	{
+		title = $(root, ".collection_title");
+		if(title)
+			title = title.innerHTML;
+		else
+			title = "Untitled Collection";
+	}
+
+	//TODO - Change this around so there's an immediate indication the download is going
+	let ele = make("a");
+	ele.href = API + "download.php?type=song&id=" + encodeURIComponent(ids.join(','));
+	ele.setAttribute("download", title + ".zip");
+	ele.click();
+	return false;
 }
